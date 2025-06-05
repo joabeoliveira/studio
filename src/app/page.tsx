@@ -1,3 +1,4 @@
+
 "use client";
 
 import { AppLayout } from "@/components/layout/app-layout";
@@ -9,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Filter, Search, PlusCircle, Activity, CheckCircle2, AlertTriangle, FileSearch } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 import type { PriceResearchStatus } from "@/types";
 
 interface DashboardStat {
@@ -43,6 +45,35 @@ const statusBadgeVariant = (status: PriceResearchStatus) => {
     default: return "secondary";
   }
 };
+
+const complianceChartData = [
+  { category: 'Aderência a Prazos', percentual: 85, fill: "var(--color-prazos)" },
+  { category: 'Coletas Válidas', percentual: 92, fill: "var(--color-coletas)" },
+  { category: 'Justificativas Completas', percentual: 78, fill: "var(--color-justificativas)" },
+  { category: 'Conformidade Documental', percentual: 88, fill: "var(--color-documental)" },
+];
+
+const chartConfig = {
+  percentual: {
+    label: "Percentual (%)",
+  },
+  prazos: {
+    label: "Aderência a Prazos",
+    color: "hsl(var(--chart-1))",
+  },
+  coletas: {
+    label: "Coletas Válidas",
+    color: "hsl(var(--chart-2))",
+  },
+  justificativas: {
+    label: "Justificativas",
+    color: "hsl(var(--chart-3))",
+  },
+  documental: {
+    label: "Documentação",
+    color: "hsl(var(--chart-4))",
+  }
+} satisfies ChartConfig;
 
 
 export default function DashboardPage() {
@@ -132,24 +163,40 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         
-        <Card className="shadow-lg" data-ai-hint="government building">
+        <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Visão Geral de Conformidade</CardTitle>
             <CardDescription>Insights sobre a conformidade com a IN 65/2021.</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="w-full md:w-1/2">
-              <Image 
-                src="https://placehold.co/600x400.png" 
-                alt="Placeholder de Gráfico de Conformidade"
-                width={600}
-                height={400}
-                className="rounded-md object-cover"
-                data-ai-hint="compliance chart"
-              />
+          <CardContent className="flex flex-col gap-4">
+            <div className="w-full h-[300px] md:h-[400px]">
+              <ChartContainer config={chartConfig} className="w-full h-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={complianceChartData} accessibilityLayer>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="category"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                      // tickFormatter={(value) => value.slice(0, 3)} // Uncomment for shorter labels if needed
+                    />
+                    <YAxis 
+                        label={{ value: 'Percentual (%)', angle: -90, position: 'insideLeft', offset: -5 }}
+                        tickFormatter={(value) => `${value}%`}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent indicator="dashed" />}
+                    />
+                    <ChartLegend content={<ChartLegendContent />} />
+                    <Bar dataKey="percentual" radius={8} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </div>
-            <div className="w-full md:w-1/2 space-y-2">
-              <p className="text-muted-foreground">Esta seção exibirá gráficos e estatísticas relacionadas à conformidade, como aderência aos parâmetros de coleta de preços, completude das justificativas e prazos de geração de relatórios.</p>
+            <div className="w-full space-y-2 text-center md:text-left">
+              <p className="text-muted-foreground">O gráfico acima demonstra os principais indicadores de conformidade das pesquisas de preços. Acompanhe a aderência aos prazos, a validade das coletas, a completude das justificativas e a conformidade documental.</p>
               <Button variant="secondary">Ver Detalhes de Conformidade</Button>
             </div>
           </CardContent>
