@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -17,6 +18,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 
 const mockResearchItems: PriceResearch[] = [
   { 
@@ -61,6 +63,7 @@ export default function IndividualResearchPage() {
     lessThanThree: '',
   });
   const [calculatedEstimatedPrice, setCalculatedEstimatedPrice] = useState<number | null>(null);
+  const { toast } = useToast();
 
 
   useEffect(() => {
@@ -119,6 +122,13 @@ export default function IndividualResearchPage() {
 
   useEffect(calculateEstimate, [selectedPricesForCalc, calculationMethod, adjustmentPercentage, researchItem]);
 
+  const handleAccessModule = (moduleName: string) => {
+    toast({
+      title: "Módulo em Desenvolvimento",
+      description: `O módulo "${moduleName}" seria acessado aqui.`,
+    });
+  };
+
 
   if (!researchItem) {
     return <AppLayout><div className="flex justify-center items-center h-full"><p>Carregando dados da pesquisa ou pesquisa não encontrada...</p></div></AppLayout>;
@@ -126,7 +136,10 @@ export default function IndividualResearchPage() {
 
   const handleSaveDetails = () => {
     setIsEditing(false);
-    alert("Detalhes salvos (simulado)!");
+    toast({
+      title: "Detalhes Salvos!",
+      description: "As informações da pesquisa foram atualizadas (simulado).",
+    });
   };
 
   return (
@@ -296,16 +309,8 @@ export default function IndividualResearchPage() {
                       <AccordionTrigger>{item.title}</AccordionTrigger>
                       <AccordionContent>
                         <div className="p-4 border rounded-md bg-muted/20">
-                           <Image 
-                            src={`https://placehold.co/400x200.png`}
-                            alt={`Placeholder ${item.title}`}
-                            width={400}
-                            height={200}
-                            className="rounded-md object-cover mb-4 w-full h-auto max-w-sm mx-auto"
-                            data-ai-hint={item.hint}
-                          />
-                          <p className="text-sm text-muted-foreground">{item.content}</p>
-                          <Button variant="secondary" className="mt-2">Acessar Módulo</Button>
+                          <p className="text-sm text-muted-foreground mb-4">{item.content}</p>
+                          <Button variant="secondary" className="mt-2" onClick={() => handleAccessModule(item.title)}>Acessar Módulo</Button>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -324,7 +329,7 @@ export default function IndividualResearchPage() {
               <CardContent className="text-center">
                 <FileText className="mx-auto h-16 w-16 text-primary mb-4" />
                 <p className="mb-4 text-muted-foreground">Todos os dados coletados e análises realizadas serão compilados no relatório oficial.</p>
-                <Button size="lg">
+                <Button size="lg" onClick={() => toast({ title: "Funcionalidade em Desenvolvimento", description: "A geração de relatórios PDF/DOCX será implementada em breve."})}>
                   <FileText className="mr-2 h-4 w-4" /> Gerar Relatório (PDF/DOCX)
                 </Button>
               </CardContent>
@@ -338,3 +343,5 @@ export default function IndividualResearchPage() {
     </AppLayout>
   );
 }
+
+    
