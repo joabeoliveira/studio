@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -62,18 +63,8 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
     };
 
     try {
-      // const result = await validatePriceEstimates(input); // Real call
-      // Mock result for UI development:
-      await new Promise(resolve => setTimeout(resolve, 1500)); 
-      const mockResult: ValidatePriceEstimatesOutput = {
-        complianceIssues: priceData.length < 3 ? ["Menos de 3 preços coletados. Justificativa necessária se este for o conjunto final."] : [],
-        estimatedCost: priceData.reduce((sum, item) => sum + item.price, 0) / (priceData.length || 1),
-        calculationDetails: `Média de ${priceData.length} preços. A mediana também poderia ser calculada. Preços variaram de X a Y.`,
-      };
-      if (Math.random() > 0.7) { 
-        mockResult.complianceIssues.push("Alguns preços parecem extraordinariamente altos/baixos em comparação com a média.");
-      }
-      setValidationResult(mockResult);
+      const result = await validatePriceEstimates(input); 
+      setValidationResult(result);
 
     } catch (e) {
       console.error("Validation failed:", e);
