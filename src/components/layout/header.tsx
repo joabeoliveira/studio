@@ -20,7 +20,6 @@ export function Header() {
 
   useEffect(() => {
     setMounted(true);
-    // Check local storage or system preference for dark mode
     const darkModePreference = localStorage.getItem("theme") === "dark" || 
       (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
     setIsDarkMode(darkModePreference);
@@ -46,7 +45,7 @@ export function Header() {
   };
 
   if (!mounted) {
-    return ( // Return a placeholder or null during server render / pre-hydration
+    return ( 
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur md:px-6">
         <div className="flex items-center gap-2">
           <div className="md:hidden">
@@ -57,9 +56,11 @@ export function Header() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
             <Bell className="h-5 w-5" />
+            <span className="sr-only">Notificações</span>
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
              <UserCircle className="h-6 w-6" />
+             <span className="sr-only">Menu do usuário</span>
           </Button>
         </div>
       </header>
@@ -70,7 +71,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur md:px-6">
       <div className="flex items-center gap-2">
-         <div className="md:hidden"> {/* Only show trigger on mobile */}
+         <div className="md:hidden"> 
             <SidebarTrigger />
          </div>
         <Link href="/" className="text-xl font-semibold font-headline">PriceWise Gov</Link>
@@ -78,31 +79,31 @@ export function Header() {
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 rounded-full">
           {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          <span className="sr-only">Toggle theme</span>
+          <span className="sr-only">Alternar tema</span>
         </Button>
         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
           <Bell className="h-5 w-5" />
-          <span className="sr-only">Notifications</span>
+          <span className="sr-only">Notificações</span>
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
               <UserCircle className="h-6 w-6" />
-              <span className="sr-only">User menu</span>
+              <span className="sr-only">Menu do usuário</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+              <span>Configurações</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <Link href="/login" passHref>
               <DropdownMenuItem>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>Sair</span>
               </DropdownMenuItem>
             </Link>
           </DropdownMenuContent>

@@ -11,20 +11,37 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AiValidationSection } from "@/components/research/ai-validation-section";
-import type { PriceResearch, PriceDataItem as PriceDataItemType } from "@/types";
+import type { PriceResearch, PriceDataItem as PriceDataItemType, ContractType, PriceResearchStatus } from "@/types";
 import { ArrowLeft, Edit, Save, PlusCircle, Paperclip, FileText, CheckSquare, Trash2, Sigma, BarChart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Mock data for a single research item - replace with actual data fetching
 const mockResearchItems: PriceResearch[] = [
-  { id: "PR001", description: "Acquisition of 100 Office Laptops Model X2024", responsibleAgent: "Ana Silva", status: "Ongoing", creationDate: "2024-07-01", lastModifiedDate: "2024-07-15", contractType: "Goods", 
+  { 
+    id: "PR001", 
+    description: "Aquisição de 100 Laptops de Escritório Modelo X2024", 
+    responsibleAgent: "Ana Silva", 
+    status: "Em Andamento" as PriceResearchStatus, 
+    creationDate: "2024-07-01", 
+    lastModifiedDate: "2024-07-15", 
+    contractType: "Bens" as ContractType, 
     priceDataItems: [
-        {id: "pdi1", source: "Painel de Preços", date: "2024-07-10", price: 3200.00, notes: "Median price for similar config"},
-        {id: "pdi2", source: "Supplier A Quote", date: "2024-07-12", price: 3150.00, notes: "Bulk discount applied"},
+        {id: "pdi1", source: "Painel de Preços", date: "2024-07-10", price: 3200.00, notes: "Preço mediano para configuração similar"},
+        {id: "pdi2", source: "Cotação Fornecedor A", date: "2024-07-12", price: 3150.00, notes: "Desconto por volume aplicado"},
     ]
   },
-   { id: "PR003", description: "Supply of Printing Materials (A4 Paper, Toner)", responsibleAgent: "Beatriz Lima", status: "Draft", creationDate: "2024-07-20", lastModifiedDate: "2024-07-20", contractType: "Goods", priceDataItems: [] },
+   { 
+    id: "PR003", 
+    description: "Fornecimento de Materiais de Impressão (Papel A4, Toner)", 
+    responsibleAgent: "Beatriz Lima", 
+    status: "Rascunho" as PriceResearchStatus, 
+    creationDate: "2024-07-20", 
+    lastModifiedDate: "2024-07-20", 
+    contractType: "Bens" as ContractType, 
+    priceDataItems: [] 
+  },
 ];
 
 
@@ -34,7 +51,6 @@ export default function IndividualResearchPage() {
   const [researchItem, setResearchItem] = useState<PriceResearch | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   
-  // States for Art. 6º - Analysis and Calculation
   const [selectedPricesForCalc, setSelectedPricesForCalc] = useState<string[]>([]);
   const [calculationMethod, setCalculationMethod] = useState<'average' | 'median' | 'lowest'>('median');
   const [adjustmentPercentage, setAdjustmentPercentage] = useState<number>(0);
@@ -52,7 +68,6 @@ export default function IndividualResearchPage() {
       const item = mockResearchItems.find(r => r.id === researchId);
       setResearchItem(item || null);
       if (item) {
-        // Initialize selectedPricesForCalc with all item IDs
         setSelectedPricesForCalc(item.priceDataItems.map(pdi => pdi.id));
       }
     }
@@ -61,7 +76,6 @@ export default function IndividualResearchPage() {
   const handlePriceDataUpdate = (updatedData: PriceDataItemType[]) => {
     if (researchItem) {
       setResearchItem({ ...researchItem, priceDataItems: updatedData });
-      // Autosave or prompt for save here in a real app
     }
   };
   
@@ -107,13 +121,12 @@ export default function IndividualResearchPage() {
 
 
   if (!researchItem) {
-    return <AppLayout><div className="flex justify-center items-center h-full"><p>Loading research data or research not found...</p></div></AppLayout>;
+    return <AppLayout><div className="flex justify-center items-center h-full"><p>Carregando dados da pesquisa ou pesquisa não encontrada...</p></div></AppLayout>;
   }
 
   const handleSaveDetails = () => {
-    // API call to save researchItem details
     setIsEditing(false);
-    alert("Details saved (mock)!");
+    alert("Detalhes salvos (simulado)!");
   };
 
   return (
@@ -121,12 +134,12 @@ export default function IndividualResearchPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <Link href="/research" className="flex items-center text-primary hover:underline">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Research List
+            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Lista de Pesquisas
           </Link>
           {isEditing ? (
-            <Button onClick={handleSaveDetails}><Save className="mr-2 h-4 w-4" /> Save Details</Button>
+            <Button onClick={handleSaveDetails}><Save className="mr-2 h-4 w-4" /> Salvar Detalhes</Button>
           ) : (
-            <Button variant="outline" onClick={() => setIsEditing(true)}><Edit className="mr-2 h-4 w-4" /> Edit Details</Button>
+            <Button variant="outline" onClick={() => setIsEditing(true)}><Edit className="mr-2 h-4 w-4" /> Editar Detalhes</Button>
           )}
         </div>
 
@@ -144,24 +157,24 @@ export default function IndividualResearchPage() {
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-2">
               <span><strong>ID:</strong> {researchItem.id}</span>
               <span><strong>Status:</strong> {researchItem.status}</span>
-              <span><strong>Type:</strong> {researchItem.contractType}</span>
-              <span><strong>Agent:</strong> 
+              <span><strong>Tipo:</strong> {researchItem.contractType}</span>
+              <span><strong>Responsável:</strong> 
                 {isEditing ? 
                   <Input value={researchItem.responsibleAgent} onChange={(e) => setResearchItem({...researchItem, responsibleAgent: e.target.value})} className="inline-w-auto h-8"/> 
                   : researchItem.responsibleAgent
                 }
               </span>
-              <span><strong>Created:</strong> {new Date(researchItem.creationDate).toLocaleDateString()}</span>
+              <span><strong>Criado:</strong> {new Date(researchItem.creationDate).toLocaleDateString()}</span>
             </div>
           </CardHeader>
         </Card>
 
         <Tabs defaultValue="aiValidation" className="w-full">
           <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            <TabsTrigger value="aiValidation">AI Validation & Data</TabsTrigger>
-            <TabsTrigger value="analysis">Price Analysis (Art. 6)</TabsTrigger>
-            <TabsTrigger value="sources">Data Sources (Art. 5)</TabsTrigger>
-            <TabsTrigger value="report">Report Generation</TabsTrigger>
+            <TabsTrigger value="aiValidation">Validação IA & Dados</TabsTrigger>
+            <TabsTrigger value="analysis">Análise de Preços (Art. 6º)</TabsTrigger>
+            <TabsTrigger value="sources">Fontes de Dados (Art. 5º)</TabsTrigger>
+            <TabsTrigger value="report">Geração de Relatório</TabsTrigger>
           </TabsList>
 
           <TabsContent value="aiValidation" className="mt-4">
@@ -175,21 +188,21 @@ export default function IndividualResearchPage() {
           <TabsContent value="analysis" className="mt-4">
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Price Analysis & Estimation (Art. 6º IN 65/2021)</CardTitle>
-                <CardDescription>Apply statistical methods and justifications for the estimated price.</CardDescription>
+                <CardTitle>Análise e Estimativa de Preços (Art. 6º IN 65/2021)</CardTitle>
+                <CardDescription>Aplicar métodos estatísticos e justificativas para o preço estimado.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Collected Prices</h3>
+                  <h3 className="text-lg font-semibold mb-2">Preços Coletados</h3>
                   {researchItem.priceDataItems.length === 0 ? (
-                     <p className="text-muted-foreground">No price data items collected yet.</p>
+                     <p className="text-muted-foreground">Nenhum item de dado de preço coletado ainda.</p>
                   ) : (
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                       {researchItem.priceDataItems.map(pdi => (
                         <div key={pdi.id} className="flex items-center justify-between p-2 border rounded-md">
                           <div>
                             <span className="font-medium">{pdi.source}: R$ {pdi.price.toFixed(2)}</span>
-                            <p className="text-xs text-muted-foreground">{pdi.notes || 'No notes'}</p>
+                            <p className="text-xs text-muted-foreground">{pdi.notes || 'Sem notas'}</p>
                           </div>
                           <Button 
                             variant={selectedPricesForCalc.includes(pdi.id) ? "default" : "outline"}
@@ -197,7 +210,7 @@ export default function IndividualResearchPage() {
                             onClick={() => handleTogglePriceSelection(pdi.id)}
                           >
                             {selectedPricesForCalc.includes(pdi.id) ? <CheckSquare className="mr-2 h-4 w-4" /> : <PlusCircle className="mr-2 h-4 w-4" />}
-                            {selectedPricesForCalc.includes(pdi.id) ? 'Selected' : 'Select'}
+                            {selectedPricesForCalc.includes(pdi.id) ? 'Selecionado' : 'Selecionar'}
                           </Button>
                         </div>
                       ))}
@@ -207,34 +220,34 @@ export default function IndividualResearchPage() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="calculationMethod">Calculation Method</Label>
+                    <Label htmlFor="calculationMethod">Método de Cálculo</Label>
                     <Select value={calculationMethod} onValueChange={(val: 'average' | 'median' | 'lowest') => setCalculationMethod(val)}>
                       <SelectTrigger id="calculationMethod">
-                        <SelectValue placeholder="Select method" />
+                        <SelectValue placeholder="Selecione o método" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="median">Median</SelectItem>
-                        <SelectItem value="average">Average</SelectItem>
-                        <SelectItem value="lowest">Lowest Value</SelectItem>
+                        <SelectItem value="median">Mediana</SelectItem>
+                        <SelectItem value="average">Média</SelectItem>
+                        <SelectItem value="lowest">Menor Valor</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="adjustmentPercentage">Adjustment (%)</Label>
+                    <Label htmlFor="adjustmentPercentage">Ajuste (%)</Label>
                     <Input 
                       id="adjustmentPercentage" 
                       type="number" 
                       value={adjustmentPercentage}
                       onChange={(e) => setAdjustmentPercentage(parseFloat(e.target.value))}
-                      placeholder="e.g., 5 for 5% increase" 
+                      placeholder="ex: 5 para 5% de aumento" 
                     />
                   </div>
                 </div>
 
                 {calculatedEstimatedPrice !== null && (
-                  <Alert variant="default" className="bg-primary/10 border-primary text-primary-foreground">
+                  <Alert variant="default" className="bg-primary/10 border-primary">
                     <Sigma className="h-5 w-5 text-primary" />
-                    <AlertTitle className="font-bold text-primary">Calculated Estimated Price</AlertTitle>
+                    <AlertTitle className="font-bold text-primary">Preço Estimado Calculado</AlertTitle>
                     <AlertDescription className="text-2xl font-bold text-primary">
                       R$ {calculatedEstimatedPrice.toFixed(2)}
                     </AlertDescription>
@@ -243,22 +256,22 @@ export default function IndividualResearchPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="justifyMethod">Justify Method/Criteria (Art. 6º, §1º, II)</Label>
-                    <Textarea id="justifyMethod" placeholder="Explain the choice of calculation method..." value={justifications.method} onChange={e => setJustifications({...justifications, method: e.target.value})} />
+                    <Label htmlFor="justifyMethod">Justificar Método/Critérios (Art. 6º, §1º, II)</Label>
+                    <Textarea id="justifyMethod" placeholder="Explique a escolha do método de cálculo..." value={justifications.method} onChange={e => setJustifications({...justifications, method: e.target.value})} />
                   </div>
                   <div>
-                    <Label htmlFor="justifyDesconsideration">Justify Desconsideration of Prices (Art. 6º, §1º, III)</Label>
-                    <Textarea id="justifyDesconsideration" placeholder="Explain any prices not used in calculation..." value={justifications.desconsideration} onChange={e => setJustifications({...justifications, desconsideration: e.target.value})} />
+                    <Label htmlFor="justifyDesconsideration">Justificar Desconsideração de Preços (Art. 6º, §1º, III)</Label>
+                    <Textarea id="justifyDesconsideration" placeholder="Explique quaisquer preços não utilizados no cálculo..." value={justifications.desconsideration} onChange={e => setJustifications({...justifications, desconsideration: e.target.value})} />
                   </div>
                    <div>
-                    <Label htmlFor="justifyLessThanThree">Justify if less than 3 prices (Art. 6º, §3º)</Label>
-                    <Textarea id="justifyLessThanThree" placeholder="Explain if estimation is based on less than three prices..." value={justifications.lessThanThree} onChange={e => setJustifications({...justifications, lessThanThree: e.target.value})} />
+                    <Label htmlFor="justifyLessThanThree">Justificar se menos de 3 preços (Art. 6º, §3º)</Label>
+                    <Textarea id="justifyLessThanThree" placeholder="Explique se a estimativa é baseada em menos de três preços..." value={justifications.lessThanThree} onChange={e => setJustifications({...justifications, lessThanThree: e.target.value})} />
                   </div>
                 </div>
               </CardContent>
               <CardFooter>
                  <Button onClick={calculateEstimate}>
-                    <BarChart className="mr-2 h-4 w-4" /> Recalculate Estimate
+                    <BarChart className="mr-2 h-4 w-4" /> Recalcular Estimativa
                 </Button>
               </CardFooter>
             </Card>
@@ -267,17 +280,17 @@ export default function IndividualResearchPage() {
           <TabsContent value="sources" className="mt-4">
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Data Collection Sources (Art. 5º IN 65/2021)</CardTitle>
-                <CardDescription>Manage and document prices from various official parameters.</CardDescription>
+                <CardTitle>Fontes de Coleta de Dados (Art. 5º IN 65/2021)</CardTitle>
+                <CardDescription>Gerenciar e documentar preços de diversos parâmetros oficiais.</CardDescription>
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                   {[
-                    { title: "I - Official Systems (Painel de Preços, etc.)", content: "Interface for searching/linking official system data.", hint: "official data" },
-                    { title: "II - Similar Public Contracts", content: "Module to upload/link similar contract data.", hint: "contracts document" },
-                    { title: "III - Specialized Media/Sites", content: "Form to input prices from media, tables, e-commerce.", hint: "website research" },
-                    { title: "IV - Direct Supplier Quotes", content: "Manage supplier quote requests and responses.", hint: "supplier meeting" },
-                    { title: "V - National NFe Database", content: "Interface for NFe data (if available).", hint: "invoice database" },
+                    { title: "I - Sistemas Oficiais (Painel de Preços, etc.)", content: "Interface para buscar/vincular dados de sistemas oficiais.", hint: "official data" },
+                    { title: "II - Contratos Públicos Similares", content: "Módulo para carregar/vincular dados de contratos similares.", hint: "contracts document" },
+                    { title: "III - Mídia Especializada/Sites", content: "Formulário para inserir preços de mídias, tabelas, e-commerce.", hint: "website research" },
+                    { title: "IV - Cotações Diretas com Fornecedores", content: "Gerenciar solicitações e respostas de cotações de fornecedores.", hint: "supplier meeting" },
+                    { title: "V - Banco de Dados Nacional de NF-e", content: "Interface para dados de NF-e (se disponível).", hint: "invoice database" },
                   ].map((item, index) => (
                     <AccordionItem value={`item-${index+1}`} key={index}>
                       <AccordionTrigger>{item.title}</AccordionTrigger>
@@ -285,14 +298,14 @@ export default function IndividualResearchPage() {
                         <div className="p-4 border rounded-md bg-muted/20">
                            <Image 
                             src={`https://placehold.co/400x200.png`}
-                            alt={`${item.title} Placeholder`}
+                            alt={`Placeholder ${item.title}`}
                             width={400}
                             height={200}
                             className="rounded-md object-cover mb-4 w-full h-auto max-w-sm mx-auto"
                             data-ai-hint={item.hint}
                           />
                           <p className="text-sm text-muted-foreground">{item.content}</p>
-                          <Button variant="secondary" className="mt-2">Access Module</Button>
+                          <Button variant="secondary" className="mt-2">Acessar Módulo</Button>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -305,18 +318,18 @@ export default function IndividualResearchPage() {
           <TabsContent value="report" className="mt-4">
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Report Generation</CardTitle>
-                <CardDescription>Generate the formal price research report compliant with IN 65/2021.</CardDescription>
+                <CardTitle>Geração de Relatório</CardTitle>
+                <CardDescription>Gerar o relatório formal de pesquisa de preços em conformidade com a IN 65/2021.</CardDescription>
               </CardHeader>
               <CardContent className="text-center">
                 <FileText className="mx-auto h-16 w-16 text-primary mb-4" />
-                <p className="mb-4 text-muted-foreground">All data collected and analyses performed will be compiled into the official report.</p>
+                <p className="mb-4 text-muted-foreground">Todos os dados coletados e análises realizadas serão compilados no relatório oficial.</p>
                 <Button size="lg">
-                  <FileText className="mr-2 h-4 w-4" /> Generate Report (PDF/DOCX)
+                  <FileText className="mr-2 h-4 w-4" /> Gerar Relatório (PDF/DOCX)
                 </Button>
               </CardContent>
                <CardFooter className="text-xs text-muted-foreground">
-                Ensure all sections are complete and justifications are provided before generating the final report.
+                Certifique-se de que todas as seções estão completas e as justificativas fornecidas antes de gerar o relatório final.
               </CardFooter>
             </Card>
           </TabsContent>
@@ -325,10 +338,3 @@ export default function IndividualResearchPage() {
     </AppLayout>
   );
 }
-
-// Minimal Accordion components if not available globally, or import from shadcn
-const Accordion = ({ children, ...props }: React.ComponentProps<'div'> & {type?: string, collapsible?: boolean}) => <div {...props}>{children}</div>;
-const AccordionItem = ({ children, ...props }: React.ComponentProps<'div'> & {value: string}) => <div {...props} className="border-b">{children}</div>;
-const AccordionTrigger = ({ children, ...props }: React.ComponentProps<'button'>) => <button {...props} className="flex w-full items-center justify-between py-4 font-medium hover:underline">{children}<span>{/* Icon */}</span></button>;
-const AccordionContent = ({ children, ...props }: React.ComponentProps<'div'>) => <div {...props} className="overflow-hidden text-sm data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"><div className="pb-4 pt-0">{children}</div></div>;
-

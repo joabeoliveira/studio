@@ -11,9 +11,9 @@ import type { User, UserRole } from "@/types";
 import { PlusCircle, Search, Filter } from "lucide-react";
 
 const initialUsers: User[] = [
-  { id: "U001", name: "Alice Wonderland", email: "alice@example.gov.br", role: "Admin" },
-  { id: "U002", name: "Bob The Builder", email: "bob@example.gov.br", role: "Researcher" },
-  { id: "U003", name: "Carol Danvers", email: "carol@example.gov.br", role: "Reviewer" },
+  { id: "U001", name: "Alice Maravilha", email: "alice@example.gov.br", role: "Administrador" },
+  { id: "U002", name: "Bob Construtor", email: "bob@example.gov.br", role: "Pesquisador" },
+  { id: "U003", name: "Carol Danvers", email: "carol@example.gov.br", role: "Revisor" },
 ];
 
 export default function UserManagementPage() {
@@ -32,9 +32,9 @@ export default function UserManagementPage() {
   };
 
   const handleSaveUser = (user: User) => {
-    if (user.id) { // Editing existing
+    if (user.id) { 
       setUsers(users.map(u => u.id === user.id ? user : u));
-    } else { // Adding new
+    } else { 
       const newUser = { ...user, id: `U${String(users.length + 1).padStart(3, '0')}` };
       setUsers([...users, newUser]);
     }
@@ -51,29 +51,29 @@ export default function UserManagementPage() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-bold font-headline">User Management</h1>
+          <h1 className="text-3xl font-bold font-headline">Gerenciamento de Usuários</h1>
           <Button onClick={() => { setEditingUser(null); setIsFormOpen(true); }}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Add User
+            <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Usuário
           </Button>
         </div>
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>User List</CardTitle>
-            <CardDescription>Manage application users and their roles.</CardDescription>
+            <CardTitle>Lista de Usuários</CardTitle>
+            <CardDescription>Gerenciar usuários da aplicação e suas permissões.</CardDescription>
             <div className="mt-4 flex flex-col sm:flex-row items-center gap-2">
               <div className="relative flex-grow w-full sm:w-auto">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
                   type="search" 
-                  placeholder="Search by name or email..." 
+                  placeholder="Buscar por nome ou e-mail..." 
                   className="pl-8 w-full sm:w-[300px]"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" /> Filter by Role
+                <Filter className="mr-2 h-4 w-4" /> Filtrar por Permissão
               </Button>
             </div>
           </CardHeader>
@@ -81,7 +81,7 @@ export default function UserManagementPage() {
             {filteredUsers.length > 0 ? (
                  <UserTable users={filteredUsers} onEdit={handleEdit} onDelete={handleDelete} />
             ) : (
-                <p className="text-center text-muted-foreground py-8">No users found.</p>
+                <p className="text-center text-muted-foreground py-8">Nenhum usuário encontrado.</p>
             )}
           </CardContent>
         </Card>

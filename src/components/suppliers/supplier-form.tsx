@@ -28,9 +28,9 @@ export function SupplierForm({ isOpen, onClose, onSave, initialData }: SupplierF
 
   const handleSubmit = () => {
     if (supplier.cnpjCpf && supplier.name) {
-      onSave(supplier as Supplier); // Assuming ID is handled by parent or backend
+      onSave(supplier as Supplier); 
     } else {
-      alert("CNPJ/CPF and Name are required.");
+      alert("CNPJ/CPF e Nome são obrigatórios.");
     }
   };
 
@@ -38,9 +38,9 @@ export function SupplierForm({ isOpen, onClose, onSave, initialData }: SupplierF
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{initialData ? "Edit" : "Add New"} Supplier</DialogTitle>
+          <DialogTitle>{initialData ? "Editar" : "Adicionar Novo"} Fornecedor</DialogTitle>
           <DialogDescription>
-            {initialData ? "Update the supplier's details." : "Enter the details for the new supplier."}
+            {initialData ? "Atualize os detalhes do fornecedor." : "Insira os detalhes para o novo fornecedor."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -49,29 +49,29 @@ export function SupplierForm({ isOpen, onClose, onSave, initialData }: SupplierF
             <Input id="cnpjCpf" name="cnpjCpf" value={supplier.cnpjCpf || ""} onChange={handleChange} className="col-span-3" required />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">Name</Label>
+            <Label htmlFor="name" className="text-right">Nome</Label>
             <Input id="name" name="name" value={supplier.name || ""} onChange={handleChange} className="col-span-3" required />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="contactName" className="text-right">Contact Name</Label>
+            <Label htmlFor="contactName" className="text-right">Nome do Contato</Label>
             <Input id="contactName" name="contactName" value={supplier.contactName || ""} onChange={handleChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">Email</Label>
+            <Label htmlFor="email" className="text-right">E-mail</Label>
             <Input id="email" name="email" type="email" value={supplier.email || ""} onChange={handleChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">Phone</Label>
+            <Label htmlFor="phone" className="text-right">Telefone</Label>
             <Input id="phone" name="phone" value={supplier.phone || ""} onChange={handleChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="address" className="text-right">Address</Label>
+            <Label htmlFor="address" className="text-right">Endereço</Label>
             <Input id="address" name="address" value={supplier.address || ""} onChange={handleChange} className="col-span-3" />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" onClick={handleSubmit}>Save Supplier</Button>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" onClick={handleSubmit}>Salvar Fornecedor</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -16,7 +16,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -54,16 +53,15 @@ export default function SuppliersPage() {
   };
 
   const handleSendQuoteEmail = () => {
-    // Mock sending email
-    alert(`Email de cotação enviado para ${quoteTargetSupplier?.email} (simulado).\nAssunto: ${quoteDetails.subject}`);
+    alert(`E-mail de cotação enviado para ${quoteTargetSupplier?.email} (simulado).\nAssunto: ${quoteDetails.subject}`);
     setIsQuoteFormOpen(false);
     setQuoteTargetSupplier(null);
   };
 
   const handleSaveSupplier = (supplier: Supplier) => {
-    if (supplier.id) { // Editing existing
+    if (supplier.id) { 
       setSuppliers(suppliers.map(s => s.id === supplier.id ? supplier : s));
-    } else { // Adding new
+    } else { 
       const newSupplier = { ...supplier, id: `S${String(suppliers.length + 1).padStart(3, '0')}` };
       setSuppliers([...suppliers, newSupplier]);
     }
@@ -80,29 +78,29 @@ export default function SuppliersPage() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-bold font-headline">Supplier Management</h1>
+          <h1 className="text-3xl font-bold font-headline">Gerenciamento de Fornecedores</h1>
           <Button onClick={() => { setEditingSupplier(null); setIsFormOpen(true); }}>
-            <PlusCircle className="mr-2 h-4 w-4" /> Add Supplier
+            <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Fornecedor
           </Button>
         </div>
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Supplier List</CardTitle>
-            <CardDescription>Manage your list of potential suppliers and their contact information.</CardDescription>
+            <CardTitle>Lista de Fornecedores</CardTitle>
+            <CardDescription>Gerencie sua lista de fornecedores potenciais e suas informações de contato.</CardDescription>
             <div className="mt-4 flex flex-col sm:flex-row items-center gap-2">
               <div className="relative flex-grow w-full sm:w-auto">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
                   type="search" 
-                  placeholder="Search by name or CNPJ/CPF..." 
+                  placeholder="Buscar por nome ou CNPJ/CPF..." 
                   className="pl-8 w-full sm:w-[300px]"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" /> Filter
+                <Filter className="mr-2 h-4 w-4" /> Filtrar
               </Button>
             </div>
           </CardHeader>
@@ -110,7 +108,7 @@ export default function SuppliersPage() {
             {filteredSuppliers.length > 0 ? (
                 <SupplierTable suppliers={filteredSuppliers} onEdit={handleEdit} onDelete={handleDelete} onSendQuoteRequest={handleOpenSendQuoteRequest} />
             ) : (
-                <p className="text-center text-muted-foreground py-8">No suppliers found.</p>
+                <p className="text-center text-muted-foreground py-8">Nenhum fornecedor encontrado.</p>
             )}
           </CardContent>
         </Card>
@@ -126,27 +124,27 @@ export default function SuppliersPage() {
       <Dialog open={isQuoteFormOpen} onOpenChange={setIsQuoteFormOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Send Quote Request to {quoteTargetSupplier?.name}</DialogTitle>
+            <DialogTitle>Enviar Solicitação de Cotação para {quoteTargetSupplier?.name}</DialogTitle>
             <DialogDescription>
-              Review and send the quote request email.
+              Revise e envie o e-mail de solicitação de cotação.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div>
-              <Label htmlFor="quoteSubject">Subject</Label>
+              <Label htmlFor="quoteSubject">Assunto</Label>
               <Input id="quoteSubject" value={quoteDetails.subject} onChange={(e) => setQuoteDetails({...quoteDetails, subject: e.target.value})} />
             </div>
             <div>
-              <Label htmlFor="quoteBody">Email Body</Label>
+              <Label htmlFor="quoteBody">Corpo do E-mail</Label>
               <Textarea id="quoteBody" value={quoteDetails.body} onChange={(e) => setQuoteDetails({...quoteDetails, body: e.target.value})} rows={10} />
             </div>
             <div className="text-sm text-muted-foreground">
-              This will simulate sending an email. In a real application, this would integrate with an email service.
+              Isso simulará o envio de um e-mail. Em uma aplicação real, isso seria integrado a um serviço de e-mail.
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsQuoteFormOpen(false)}>Cancel</Button>
-            <Button onClick={handleSendQuoteEmail}><Mail className="mr-2 h-4 w-4" /> Send Email</Button>
+            <Button variant="outline" onClick={() => setIsQuoteFormOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSendQuoteEmail}><Mail className="mr-2 h-4 w-4" /> Enviar E-mail</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

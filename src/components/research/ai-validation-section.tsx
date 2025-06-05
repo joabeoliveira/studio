@@ -1,54 +1,55 @@
 "use client";
 
 import { useState } from 'react';
-import type { PriceDataItem, ValidatePriceEstimatesInput, ValidatePriceEstimatesOutput } from '@/ai/flows/validate-price-estimates';
-import { validatePriceEstimates } from '@/ai/flows/validate-price-estimates'; // Assuming this can be called client-side or via server action
+import type { PriceDataItem as PriceDataItemTypeForAI } from '@/ai/flows/validate-price-estimates'; // AI version without UI id
+import { validatePriceEstimates, type ValidatePriceEstimatesInput, type ValidatePriceEstimatesOutput } from '@/ai/flows/validate-price-estimates';
+import type { PriceDataItem as PriceDataItemUIType } from '@/types'; // UI version with id
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, CheckCircle, AlertCircle, Sigma, FileDigit } from 'lucide-react';
-import { PriceDataItemForm } from './price-data-item-form'; // For managing price data items
+import { PriceDataItemForm } from './price-data-item-form';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 
 interface AiValidationSectionProps {
   researchDescription: string;
-  initialPriceData: PriceDataItem[];
-  onPriceDataUpdate: (updatedData: PriceDataItem[]) => void;
+  initialPriceData: PriceDataItemUIType[];
+  onPriceDataUpdate: (updatedData: PriceDataItemUIType[]) => void;
 }
 
 export function AiValidationSection({ researchDescription, initialPriceData, onPriceDataUpdate }: AiValidationSectionProps) {
-  const [priceData, setPriceData] = useState<PriceDataItem[]>(initialPriceData);
+  const [priceData, setPriceData] = useState<PriceDataItemUIType[]>(initialPriceData);
   const [currentDescription, setCurrentDescription] = useState(researchDescription);
   const [validationResult, setValidationResult] = useState<ValidatePriceEstimatesOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
 
-  const handleAddPriceDataItem = (item: PriceDataItem) => {
+  const handleAddPriceDataItem = (item: PriceDataItemUIType) => {
     const updatedData = [...priceData, item];
     setPriceData(updatedData);
-    onPriceDataUpdate(updatedData); // Notify parent
+    onPriceDataUpdate(updatedData); 
     setShowAddItemForm(false);
   };
 
-  const handleUpdatePriceDataItem = (updatedItem: PriceDataItem) => {
+  const handleUpdatePriceDataItem = (updatedItem: PriceDataItemUIType) => {
     const updatedData = priceData.map(item => item.id === updatedItem.id ? updatedItem : item);
     setPriceData(updatedData);
-    onPriceDataUpdate(updatedData); // Notify parent
+    onPriceDataUpdate(updatedData); 
   };
 
   const handleDeletePriceDataItem = (id: string) => {
     const updatedData = priceData.filter(item => item.id !== id);
     setPriceData(updatedData);
-    onPriceDataUpdate(updatedData); // Notify parent
+    onPriceDataUpdate(updatedData); 
   };
 
 
   const handleValidate = async () => {
     if (priceData.length === 0) {
-      setError("Please add at least one price data item before validation.");
+      setError("Adicione pelo menos um item de dado de preço antes da validação.");
       return;
     }
     setIsLoading(true);
@@ -57,28 +58,26 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
 
     const input: ValidatePriceEstimatesInput = {
       description: currentDescription,
-      priceData: priceData.map(({ id, ...rest }) => rest), // Remove client-side ID before sending
+      priceData: priceData.map(({ id, ...rest }) => rest as PriceDataItemTypeForAI), 
     };
 
     try {
-      // In a real app, this would be a server action or API call
-      // For now, directly call if it's set up to work, or mock
-      // const result = await validatePriceEstimates(input);
+      // const result = await validatePriceEstimates(input); // Real call
       // Mock result for UI development:
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500)); 
       const mockResult: ValidatePriceEstimatesOutput = {
-        complianceIssues: priceData.length < 3 ? ["Less than 3 prices collected. Justification needed if this is the final set."] : [],
+        complianceIssues: priceData.length < 3 ? ["Menos de 3 preços coletados. Justificativa necessária se este for o conjunto final."] : [],
         estimatedCost: priceData.reduce((sum, item) => sum + item.price, 0) / (priceData.length || 1),
-        calculationDetails: `Average of ${priceData.length} prices. Median could also be calculated. Prices ranged from X to Y.`,
+        calculationDetails: `Média de ${priceData.length} preços. A mediana também poderia ser calculada. Preços variaram de X a Y.`,
       };
-      if (Math.random() > 0.7) { // Simulate occasional other issues
-        mockResult.complianceIssues.push("Some prices seem unusually high/low compared to the average.");
+      if (Math.random() > 0.7) { 
+        mockResult.complianceIssues.push("Alguns preços parecem extraordinariamente altos/baixos em comparação com a média.");
       }
       setValidationResult(mockResult);
 
     } catch (e) {
       console.error("Validation failed:", e);
-      setError("An error occurred during validation. Please try again.");
+      setError("Ocorreu um erro durante a validação. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -87,27 +86,27 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle>AI-Powered Price Validation (IN65/2021)</CardTitle>
+        <CardTitle>Validação de Preços com IA (IN65/2021)</CardTitle>
         <CardDescription>
-          Validate your collected price data against compliance standards and get an estimated cost.
+          Valide seus dados de preços coletados em relação aos padrões de conformidade e obtenha um custo estimado.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <Label htmlFor="researchItemDescription">Item/Service Description</Label>
+          <Label htmlFor="researchItemDescription">Descrição do Item/Serviço</Label>
           <Textarea 
             id="researchItemDescription"
             value={currentDescription}
             onChange={(e) => setCurrentDescription(e.target.value)}
-            placeholder="Detailed description of the item or service being priced"
+            placeholder="Descrição detalhada do item ou serviço sendo cotado"
             rows={3}
           />
         </div>
         
         <div>
-          <h3 className="text-lg font-semibold mb-2">Price Data Items</h3>
+          <h3 className="text-lg font-semibold mb-2">Itens de Dados de Preço</h3>
           {priceData.length === 0 && !showAddItemForm && (
-            <p className="text-sm text-muted-foreground">No price data items added yet.</p>
+            <p className="text-sm text-muted-foreground">Nenhum item de dado de preço adicionado ainda.</p>
           )}
           <ScrollArea className="max-h-[300px] pr-3">
           {priceData.map((item) => (
@@ -130,7 +129,7 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
           )}
           {!showAddItemForm && (
             <Button variant="outline" onClick={() => setShowAddItemForm(true)} className="mt-2">
-              Add Price Data Item
+              Adicionar Item de Dado de Preço
             </Button>
           )}
         </div>
@@ -141,13 +140,13 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
           ) : (
             <Sigma className="mr-2 h-4 w-4" />
           )}
-          Validate Prices & Estimate Cost
+          Validar Preços & Estimar Custo
         </Button>
 
         {error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
+            <AlertTitle>Erro</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -156,12 +155,12 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
           <div className="space-y-4 pt-4 border-t">
             <h3 className="text-xl font-semibold flex items-center">
               <FileDigit className="mr-2 h-6 w-6 text-primary" />
-              Validation Results
+              Resultados da Validação
             </h3>
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Estimated Cost</CardTitle>
+                <CardTitle className="text-lg">Custo Estimado</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-primary">
@@ -175,7 +174,7 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Compliance Issues</CardTitle>
+                <CardTitle className="text-lg">Problemas de Conformidade</CardTitle>
               </CardHeader>
               <CardContent>
                 {validationResult.complianceIssues.length > 0 ? (
@@ -190,7 +189,7 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
                 ) : (
                   <p className="text-sm text-green-600 flex items-center">
                     <CheckCircle className="mr-2 h-4 w-4" />
-                    No major compliance issues detected based on provided data.
+                    Nenhum problema de conformidade maior detectado com base nos dados fornecidos.
                   </p>
                 )}
               </CardContent>
@@ -200,7 +199,7 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
       </CardContent>
       <CardFooter>
         <p className="text-xs text-muted-foreground">
-          Note: AI validation assists in identifying potential issues. Final compliance responsibility rests with the user.
+          Nota: A validação por IA auxilia na identificação de problemas potenciais. A responsabilidade final pela conformidade é do usuário.
         </p>
       </CardFooter>
     </Card>

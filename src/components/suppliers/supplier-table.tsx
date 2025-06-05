@@ -19,10 +19,10 @@ export function SupplierTable({ suppliers, onEdit, onDelete, onSendQuoteRequest 
       <TableHeader>
         <TableRow>
           <TableHead>CNPJ/CPF</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Contact</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead>Nome</TableHead>
+          <TableHead>Contato</TableHead>
+          <TableHead>E-mail</TableHead>
+          <TableHead className="text-right">Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -36,19 +36,19 @@ export function SupplierTable({ suppliers, onEdit, onDelete, onSendQuoteRequest 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">Abrir menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => onEdit(supplier)}>
-                    <Edit className="mr-2 h-4 w-4" /> Edit
+                    <Edit className="mr-2 h-4 w-4" /> Editar
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onSendQuoteRequest(supplier)}>
-                    <Mail className="mr-2 h-4 w-4" /> Send Quote Request
+                    <Mail className="mr-2 h-4 w-4" /> Enviar Pedido de Cotação
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onDelete(supplier.id)} className="text-destructive focus:text-destructive-foreground focus:bg-destructive">
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    <Trash2 className="mr-2 h-4 w-4" /> Excluir
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

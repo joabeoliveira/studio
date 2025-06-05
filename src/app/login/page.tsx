@@ -15,28 +15,28 @@ export default function LoginPage() {
         <CardHeader className="space-y-1 text-center">
           <Image 
             src="https://placehold.co/100x100.png" 
-            alt="PriceWise Gov Logo" 
+            alt="Logo PriceWise Gov" 
             width={80} 
             height={80} 
             className="mx-auto mb-4 rounded-full"
             data-ai-hint="government logo" 
           />
           <CardTitle className="text-3xl font-bold font-headline text-primary">PriceWise Gov</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+          <CardDescription>Insira suas credenciais para acessar sua conta</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">E-mail</Label>
             <div className="relative">
               <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input id="email" type="email" placeholder="user@example.gov.br" required className="pl-8"/>
+              <Input id="email" type="email" placeholder="usuario@example.gov.br" required className="pl-8"/>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Senha</Label>
               <Link href="#" className="text-sm text-primary hover:underline">
-                Forgot password?
+                Esqueceu a senha?
               </Link>
             </div>
             <div className="relative">
@@ -46,11 +46,11 @@ export default function LoginPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Login</Button>
+          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Entrar</Button>
           <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
+            Não tem uma conta?{" "}
             <Link href="/signup" className="font-medium text-primary hover:underline">
-              Sign up
+              Cadastre-se
             </Link>
           </p>
         </CardFooter>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { User } from "@/types";
+import type { User, UserRole } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,11 @@ interface UserTableProps {
   onDelete: (id: string) => void;
 }
 
-const roleBadgeVariant = (role: string) => {
+const roleBadgeVariant = (role: UserRole) => {
   switch (role) {
-    case "Admin": return "destructive";
-    case "Researcher": return "default";
-    case "Reviewer": return "secondary";
+    case "Administrador": return "destructive";
+    case "Pesquisador": return "default";
+    case "Revisor": return "secondary";
     default: return "outline";
   }
 };
@@ -27,10 +27,10 @@ export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead>Nome</TableHead>
+          <TableHead>E-mail</TableHead>
+          <TableHead>Permissão</TableHead>
+          <TableHead className="text-right">Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -45,16 +45,16 @@ export function UserTable({ users, onEdit, onDelete }: UserTableProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">Abrir menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => onEdit(user)}>
-                    <Edit className="mr-2 h-4 w-4" /> Edit
+                    <Edit className="mr-2 h-4 w-4" /> Editar
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onDelete(user.id)} className="text-destructive focus:text-destructive-foreground focus:bg-destructive">
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    <Trash2 className="mr-2 h-4 w-4" /> Excluir
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

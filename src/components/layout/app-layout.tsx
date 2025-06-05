@@ -33,7 +33,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <Link href="/login" className="w-full">
             <Button variant="ghost" className="w-full justify-start">
               <LogOut className="mr-2 h-4 w-4" />
-              Logout
+              Sair
             </Button>
           </Link>
         </SidebarFooter>

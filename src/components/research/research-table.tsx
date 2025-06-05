@@ -1,6 +1,6 @@
 "use client";
 
-import type { PriceResearch } from "@/types";
+import type { PriceResearch, PriceResearchStatus } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,11 @@ interface ResearchTableProps {
 
 const statusBadgeVariant = (status: PriceResearchStatus) => {
   switch (status) {
-    case "Ongoing": return "secondary";
-    case "Completed": return "default";
-    case "Pending Review": return "outline";
-    case "Draft": return "destructive";
+    case "Em Andamento": return "secondary";
+    case "Concluída": return "default";
+    case "Pendente de Revisão": return "outline";
+    case "Rascunho": return "destructive";
+    case "Arquivada": return "secondary";
     default: return "secondary";
   }
 };
@@ -32,12 +33,12 @@ export function ResearchTable({ researchItems, onEdit, onDelete, onViewReport }:
       <TableHeader>
         <TableRow>
           <TableHead>ID</TableHead>
-          <TableHead>Description</TableHead>
+          <TableHead>Descrição</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Agent</TableHead>
-          <TableHead>Last Modified</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead>Tipo</TableHead>
+          <TableHead>Responsável</TableHead>
+          <TableHead>Última Modificação</TableHead>
+          <TableHead className="text-right">Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -59,19 +60,19 @@ export function ResearchTable({ researchItems, onEdit, onDelete, onViewReport }:
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">Abrir menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => onEdit(item)}>
-                    <Edit className="mr-2 h-4 w-4" /> Edit
+                    <Edit className="mr-2 h-4 w-4" /> Editar
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onViewReport(item.id)}>
-                    <FileText className="mr-2 h-4 w-4" /> View Report
+                    <FileText className="mr-2 h-4 w-4" /> Ver Relatório
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onDelete(item.id)} className="text-destructive focus:text-destructive-foreground focus:bg-destructive">
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    <Trash2 className="mr-2 h-4 w-4" /> Excluir
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

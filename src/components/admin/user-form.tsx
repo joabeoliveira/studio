@@ -16,10 +16,10 @@ interface UserFormProps {
 }
 
 export function UserForm({ isOpen, onClose, onSave, initialData }: UserFormProps) {
-  const [user, setUser] = useState<Partial<User>>(initialData || { role: "Researcher"});
+  const [user, setUser] = useState<Partial<User>>(initialData || { role: "Pesquisador"});
 
   useEffect(() => {
-    setUser(initialData || { role: "Researcher"});
+    setUser(initialData || { role: "Pesquisador"});
   }, [initialData, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,9 +33,9 @@ export function UserForm({ isOpen, onClose, onSave, initialData }: UserFormProps
 
   const handleSubmit = () => {
     if (user.name && user.email && user.role) {
-      onSave(user as User); // Assuming ID is handled by parent or backend
+      onSave(user as User); 
     } else {
-      alert("Name, Email, and Role are required.");
+      alert("Nome, E-mail e Permissão são obrigatórios.");
     }
   };
 
@@ -43,43 +43,43 @@ export function UserForm({ isOpen, onClose, onSave, initialData }: UserFormProps
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{initialData ? "Edit" : "Add New"} User</DialogTitle>
+          <DialogTitle>{initialData ? "Editar" : "Adicionar Novo"} Usuário</DialogTitle>
           <DialogDescription>
-            {initialData ? "Update the user's details and role." : "Enter the details for the new user."}
+            {initialData ? "Atualize os detalhes e a permissão do usuário." : "Insira os detalhes para o novo usuário."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">Name</Label>
+            <Label htmlFor="name" className="text-right">Nome</Label>
             <Input id="name" name="name" value={user.name || ""} onChange={handleChange} className="col-span-3" required />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">Email</Label>
+            <Label htmlFor="email" className="text-right">E-mail</Label>
             <Input id="email" name="email" type="email" value={user.email || ""} onChange={handleChange} className="col-span-3" required />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="role" className="text-right">Role</Label>
+            <Label htmlFor="role" className="text-right">Permissão</Label>
             <Select value={user.role} onValueChange={handleRoleChange}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select role" />
+                <SelectValue placeholder="Selecione a permissão" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Admin">Admin</SelectItem>
-                <SelectItem value="Researcher">Researcher</SelectItem>
-                <SelectItem value="Reviewer">Reviewer</SelectItem>
+                <SelectItem value="Administrador">Administrador</SelectItem>
+                <SelectItem value="Pesquisador">Pesquisador</SelectItem>
+                <SelectItem value="Revisor">Revisor</SelectItem>
               </SelectContent>
             </Select>
           </div>
-           {(!initialData || !user.id) && ( // Only show for new users, or if password reset is separate
+           {(!initialData || !user.id) && ( 
             <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="password" className="text-right">Password</Label>
-                <Input id="password" name="password" type="password" placeholder="Set initial password" onChange={handleChange} className="col-span-3" />
+                <Label htmlFor="password" className="text-right">Senha</Label>
+                <Input id="password" name="password" type="password" placeholder="Definir senha inicial" onChange={handleChange} className="col-span-3" />
             </div>
            )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" onClick={handleSubmit}>Save User</Button>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" onClick={handleSubmit}>Salvar Usuário</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

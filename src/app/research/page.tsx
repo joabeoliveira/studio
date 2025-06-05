@@ -17,16 +17,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const initialResearchItems: PriceResearch[] = [
-  { id: "PR001", description: "Acquisition of 100 Office Chairs", responsibleAgent: "Ana Silva", status: "Ongoing", creationDate: "2024-07-01", lastModifiedDate: "2024-07-15", contractType: "Goods", priceDataItems: [] },
-  { id: "PR002", description: "Development of New HR Portal", responsibleAgent: "Carlos Souza", status: "Completed", creationDate: "2024-05-10", lastModifiedDate: "2024-06-20", contractType: "Services", priceDataItems: [] },
-  { id: "PR003", description: "Supply of Printing Materials", responsibleAgent: "Beatriz Lima", status: "Draft", creationDate: "2024-07-20", lastModifiedDate: "2024-07-20", contractType: "Goods", priceDataItems: [] },
-  { id: "PR004", description: "Security Services for Main Building", responsibleAgent: "David Costa", status: "Pending Review", creationDate: "2024-06-01", lastModifiedDate: "2024-07-10", contractType: "Services", priceDataItems: [] },
+  { id: "PR001", description: "Aquisição de 100 Cadeiras de Escritório", responsibleAgent: "Ana Silva", status: "Em Andamento", creationDate: "2024-07-01", lastModifiedDate: "2024-07-15", contractType: "Bens", priceDataItems: [] },
+  { id: "PR002", description: "Desenvolvimento do Novo Portal de RH", responsibleAgent: "Carlos Souza", status: "Concluída", creationDate: "2024-05-10", lastModifiedDate: "2024-06-20", contractType: "Serviços", priceDataItems: [] },
+  { id: "PR003", description: "Fornecimento de Materiais de Impressão", responsibleAgent: "Beatriz Lima", status: "Rascunho", creationDate: "2024-07-20", lastModifiedDate: "2024-07-20", contractType: "Bens", priceDataItems: [] },
+  { id: "PR004", description: "Serviços de Segurança para Edifício Principal", responsibleAgent: "David Costa", status: "Pendente de Revisão", creationDate: "2024-06-01", lastModifiedDate: "2024-07-10", contractType: "Serviços", priceDataItems: [] },
 ];
 
 export default function ResearchPage() {
@@ -37,7 +36,7 @@ export default function ResearchPage() {
   const [editingItem, setEditingItem] = useState<PriceResearch | null>(null);
 
   const [newResearchData, setNewResearchData] = useState<{description: string, responsibleAgent: string, contractType: ContractType}>({
-    description: "", responsibleAgent: "", contractType: "Goods"
+    description: "", responsibleAgent: "", contractType: "Bens"
   });
 
   const handleEdit = (item: PriceResearch) => {
@@ -47,13 +46,11 @@ export default function ResearchPage() {
   };
 
   const handleDelete = (id: string) => {
-    // Add confirmation dialog here in a real app
     setResearchItems(researchItems.filter(item => item.id !== id));
   };
   
   const handleViewReport = (id: string) => {
-    // Navigate to report page or open report
-    alert(`Viewing report for ${id}`);
+    alert(`Visualizando relatório para ${id}`);
   };
 
   const handleFormSubmit = () => {
@@ -63,7 +60,7 @@ export default function ResearchPage() {
       const newItem: PriceResearch = {
         id: `PR${String(researchItems.length + 1).padStart(3, '0')}`,
         ...newResearchData,
-        status: "Draft",
+        status: "Rascunho",
         creationDate: new Date().toISOString(),
         lastModifiedDate: new Date().toISOString(),
         priceDataItems: [],
@@ -72,12 +69,12 @@ export default function ResearchPage() {
     }
     setIsFormOpen(false);
     setEditingItem(null);
-    setNewResearchData({ description: "", responsibleAgent: "", contractType: "Goods" });
+    setNewResearchData({ description: "", responsibleAgent: "", contractType: "Bens" });
   };
   
   const openNewResearchForm = () => {
     setEditingItem(null);
-    setNewResearchData({ description: "", responsibleAgent: "", contractType: "Goods" });
+    setNewResearchData({ description: "", responsibleAgent: "", contractType: "Bens" });
     setIsFormOpen(true);
   }
 
@@ -90,22 +87,22 @@ export default function ResearchPage() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-bold font-headline">Price Research</h1>
+          <h1 className="text-3xl font-bold font-headline">Pesquisa de Preços</h1>
           <Button onClick={openNewResearchForm}>
-            <PlusCircle className="mr-2 h-4 w-4" /> New Research
+            <PlusCircle className="mr-2 h-4 w-4" /> Nova Pesquisa
           </Button>
         </div>
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Manage Research Projects</CardTitle>
-            <CardDescription>Create, view, and manage all price research initiatives.</CardDescription>
+            <CardTitle>Gerenciar Projetos de Pesquisa</CardTitle>
+            <CardDescription>Criar, visualizar e gerenciar todas as iniciativas de pesquisa de preços.</CardDescription>
             <div className="mt-4 flex flex-col sm:flex-row items-center gap-2">
               <div className="relative flex-grow w-full sm:w-auto">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
                   type="search" 
-                  placeholder="Search by description..." 
+                  placeholder="Buscar por descrição..." 
                   className="pl-8 w-full sm:w-[300px]"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -113,19 +110,19 @@ export default function ResearchPage() {
               </div>
               <Select value={statusFilter} onValueChange={(value: PriceResearchStatus | "all") => setStatusFilter(value)}>
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Filter by status" />
+                  <SelectValue placeholder="Filtrar por status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="Draft">Draft</SelectItem>
-                  <SelectItem value="Ongoing">Ongoing</SelectItem>
-                  <SelectItem value="Pending Review">Pending Review</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Archived">Archived</SelectItem>
+                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <SelectItem value="Rascunho">Rascunho</SelectItem>
+                  <SelectItem value="Em Andamento">Em Andamento</SelectItem>
+                  <SelectItem value="Pendente de Revisão">Pendente de Revisão</SelectItem>
+                  <SelectItem value="Concluída">Concluída</SelectItem>
+                  <SelectItem value="Arquivada">Arquivada</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" /> More Filters
+                <Filter className="mr-2 h-4 w-4" /> Mais Filtros
               </Button>
             </div>
           </CardHeader>
@@ -133,7 +130,7 @@ export default function ResearchPage() {
             {filteredItems.length > 0 ? (
                 <ResearchTable researchItems={filteredItems} onEdit={handleEdit} onDelete={handleDelete} onViewReport={handleViewReport} />
             ) : (
-                <p className="text-center text-muted-foreground py-8">No research items found.</p>
+                <p className="text-center text-muted-foreground py-8">Nenhum item de pesquisa encontrado.</p>
             )}
           </CardContent>
         </Card>
@@ -142,52 +139,51 @@ export default function ResearchPage() {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{editingItem ? "Edit" : "Create New"} Price Research</DialogTitle>
+            <DialogTitle>{editingItem ? "Editar" : "Criar Nova"} Pesquisa de Preços</DialogTitle>
             <DialogDescription>
-              {editingItem ? "Update the details of the price research." : "Fill in the details to start a new price research."}
+              {editingItem ? "Atualize os detalhes da pesquisa de preços." : "Preencha os detalhes para iniciar uma nova pesquisa de preços."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">Description</Label>
+              <Label htmlFor="description" className="text-right">Descrição</Label>
               <Textarea 
                 id="description" 
                 value={newResearchData.description}
                 onChange={(e) => setNewResearchData({...newResearchData, description: e.target.value})}
                 className="col-span-3" 
-                placeholder="Detailed description of the object"
+                placeholder="Descrição detalhada do objeto"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="responsibleAgent" className="text-right">Responsible Agent</Label>
+              <Label htmlFor="responsibleAgent" className="text-right">Agente Responsável</Label>
               <Input 
                 id="responsibleAgent" 
                 value={newResearchData.responsibleAgent}
                 onChange={(e) => setNewResearchData({...newResearchData, responsibleAgent: e.target.value})}
                 className="col-span-3"
-                placeholder="Name of the agent or team"
+                placeholder="Nome do agente ou equipe"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="contractType" className="text-right">Contract Type</Label>
+              <Label htmlFor="contractType" className="text-right">Tipo de Contrato</Label>
               <Select 
                 value={newResearchData.contractType}
                 onValueChange={(value: ContractType) => setNewResearchData({...newResearchData, contractType: value})}
               >
                 <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select contract type" />
+                  <SelectValue placeholder="Selecione o tipo de contrato" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Goods">Goods</SelectItem>
-                  <SelectItem value="Services">Services</SelectItem>
+                  <SelectItem value="Bens">Bens</SelectItem>
+                  <SelectItem value="Serviços">Serviços</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-             {/* Add attachments field if needed */}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancel</Button>
-            <Button type="submit" onClick={handleFormSubmit}>{editingItem ? "Save Changes" : "Create Research"}</Button>
+            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
+            <Button type="submit" onClick={handleFormSubmit}>{editingItem ? "Salvar Alterações" : "Criar Pesquisa"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

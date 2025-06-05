@@ -1,7 +1,13 @@
 
-import type { PriceDataItemSchema } from '@/ai/flows/validate-price-estimates';
+import type { PriceDataItemSchema as AiPriceDataItemSchema } from '@/ai/flows/validate-price-estimates'; // Renamed to avoid conflict if re-exporting a modified version
+import { z } from 'zod';
 
-export type UserRole = "Admin" | "Researcher" | "Reviewer";
+
+// Define Zod schemas for base types that might be used by AI flows AND UI
+// This helps keep AI-facing descriptions in one place.
+
+export const UserRoleSchema = z.enum(["Administrador", "Pesquisador", "Revisor"]);
+export type UserRole = z.infer<typeof UserRoleSchema>;
 
 export interface User {
   id: string;
@@ -10,26 +16,32 @@ export interface User {
   role: UserRole;
 }
 
-export type PriceResearchStatus = "Draft" | "Ongoing" | "Pending Review" | "Completed" | "Archived";
-export type ContractType = "Goods" | "Services";
+export const PriceResearchStatusSchema = z.enum(["Rascunho", "Em Andamento", "Pendente de Revisão", "Concluída", "Arquivada"]);
+export type PriceResearchStatus = z.infer<typeof PriceResearchStatusSchema>;
+
+export const ContractTypeSchema = z.enum(["Bens", "Serviços"]);
+export type ContractType = z.infer<typeof ContractTypeSchema>;
+
+// For UI, we add an 'id'. For AI, it's usually not needed in the input list.
+export const PriceDataItemUISchema = AiPriceDataItemSchema.extend({
+  id: z.string().describe("Identificador único do item de dado de preço (uso interno da UI).")
+});
+export type PriceDataItem = z.infer<typeof PriceDataItemUISchema>;
+
 
 export interface PriceResearch {
   id: string;
   description: string;
-  responsibleAgent: string; // User ID or name
+  responsibleAgent: string; 
   status: PriceResearchStatus;
-  creationDate: string; // ISO Date string
-  lastModifiedDate: string; // ISO Date string
+  creationDate: string; 
+  lastModifiedDate: string; 
   contractType: ContractType;
-  attachments?: File[]; // Placeholder for file objects
+  attachments?: File[]; 
   priceDataItems: PriceDataItem[];
   estimatedPrice?: number;
-  calculationMethod?: "average" | "median" | "lowest";
+  calculationMethod?: "average" | "median" | "lowest"; // These could be translated for display if needed
 }
-
-// Re-exporting from AI flow for consistency, but potentially extending it for UI needs
-export type PriceDataItem = Zod.infer<typeof PriceDataItemSchema> & { id: string };
-
 
 export interface Supplier {
   id: string;
@@ -47,9 +59,9 @@ export interface QuoteRequest {
   researchId: string;
   requestDate: string;
   responseDeadline: string;
-  status: "Sent" | "Responded" | "No Response" | "Declined";
-  proposalFile?: File; // Placeholder
-  proposalDetails?: string; // Manual entry
+  status: "Enviada" | "Respondida" | "Sem Resposta" | "Recusada"; // Translated status
+  proposalFile?: File; 
+  proposalDetails?: string; 
 }
 
 export interface Report {
@@ -57,6 +69,5 @@ export interface Report {
   researchId: string;
   researchDescription: string;
   generationDate: string;
-  generatedBy: string; // User ID or name
-  // Url to the report, or mock data
+  generatedBy: string; 
 }

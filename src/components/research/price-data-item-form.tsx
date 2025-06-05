@@ -31,41 +31,41 @@ export function PriceDataItemForm({ item, onSave, onCancel, onDelete, isExisting
     e.preventDefault();
     if (formData.source && formData.date && formData.price != null) {
       onSave({
-        id: formData.id || `PDI-${Date.now()}`, // Generate ID if new
+        id: formData.id || `PDI-${Date.now()}`, 
         source: formData.source,
         date: formData.date,
         price: formData.price,
         notes: formData.notes,
       });
-      if (!isExisting) { // Clear form only if it's for adding new, not editing inline
+      if (!isExisting) { 
         setFormData({ source: '', date: '', price: 0, notes: '' });
       }
     } else {
-      alert("Please fill in all required fields: Source, Date, and Price.");
+      alert("Por favor, preencha todos os campos obrigatórios: Fonte, Data e Preço.");
     }
   };
 
   return (
     <Card className="mb-4">
       <CardHeader className={isExisting ? "py-2 px-4 border-b" : ""}>
-        {isExisting && <CardTitle className="text-sm">Edit Price Data</CardTitle>}
+        {isExisting && <CardTitle className="text-sm">Editar Dado de Preço</CardTitle>}
       </CardHeader>
       <CardContent className={isExisting ? "pt-4 px-4" : "pt-6"}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor={`source-${formData.id || 'new'}`}>Source</Label>
+            <Label htmlFor={`source-${formData.id || 'new'}`}>Fonte</Label>
             <Input
               id={`source-${formData.id || 'new'}`}
               name="source"
               value={formData.source || ''}
               onChange={handleChange}
-              placeholder="e.g., Painel de Preços, Supplier Quote"
+              placeholder="ex: Painel de Preços, Cotação de Fornecedor"
               required
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor={`date-${formData.id || 'new'}`}>Date (YYYY-MM-DD)</Label>
+              <Label htmlFor={`date-${formData.id || 'new'}`}>Data (AAAA-MM-DD)</Label>
               <Input
                 id={`date-${formData.id || 'new'}`}
                 name="date"
@@ -76,7 +76,7 @@ export function PriceDataItemForm({ item, onSave, onCancel, onDelete, isExisting
               />
             </div>
             <div>
-              <Label htmlFor={`price-${formData.id || 'new'}`}>Price</Label>
+              <Label htmlFor={`price-${formData.id || 'new'}`}>Preço</Label>
               <Input
                 id={`price-${formData.id || 'new'}`}
                 name="price"
@@ -90,18 +90,18 @@ export function PriceDataItemForm({ item, onSave, onCancel, onDelete, isExisting
             </div>
           </div>
           <div>
-            <Label htmlFor={`notes-${formData.id || 'new'}`}>Notes</Label>
+            <Label htmlFor={`notes-${formData.id || 'new'}`}>Notas</Label>
             <Textarea
               id={`notes-${formData.id || 'new'}`}
               name="notes"
               value={formData.notes || ''}
               onChange={handleChange}
-              placeholder="Any qualifications or details"
+              placeholder="Quaisquer qualificações ou detalhes"
             />
           </div>
           <div className="flex justify-end space-x-2">
-            {onCancel && <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>}
-            <Button type="submit">{isExisting ? "Save Changes" : "Add Price Data"}</Button>
+            {onCancel && <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>}
+            <Button type="submit">{isExisting ? "Salvar Alterações" : "Adicionar Dado de Preço"}</Button>
             {isExisting && onDelete && formData.id && (
               <Button type="button" variant="destructive" size="icon" onClick={() => onDelete(formData.id!)}>
                 <Trash2 className="h-4 w-4" />

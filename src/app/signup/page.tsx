@@ -15,39 +15,39 @@ export default function SignupPage() {
         <CardHeader className="space-y-1 text-center">
            <Image 
             src="https://placehold.co/100x100.png" 
-            alt="PriceWise Gov Logo" 
+            alt="Logo PriceWise Gov" 
             width={80} 
             height={80} 
             className="mx-auto mb-4 rounded-full"
             data-ai-hint="government logo" 
           />
-          <CardTitle className="text-3xl font-bold font-headline text-primary">Create Account</CardTitle>
-          <CardDescription>Join PriceWise Gov to streamline procurement</CardDescription>
+          <CardTitle className="text-3xl font-bold font-headline text-primary">Criar Conta</CardTitle>
+          <CardDescription>Junte-se ao PriceWise Gov para otimizar as compras</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="fullName">Full Name</Label>
+            <Label htmlFor="fullName">Nome Completo</Label>
             <div className="relative">
               <User className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input id="fullName" placeholder="Your Full Name" required className="pl-8" />
+              <Input id="fullName" placeholder="Seu Nome Completo" required className="pl-8" />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">E-mail</Label>
             <div className="relative">
               <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input id="email" type="email" placeholder="user@example.gov.br" required className="pl-8" />
+              <Input id="email" type="email" placeholder="usuario@example.gov.br" required className="pl-8" />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Senha</Label>
             <div className="relative">
               <KeyRound className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input id="password" type="password" required className="pl-8" />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">Confirmar Senha</Label>
             <div className="relative">
               <KeyRound className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input id="confirmPassword" type="password" required className="pl-8" />
@@ -55,11 +55,11 @@ export default function SignupPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Sign Up</Button>
+          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Cadastrar</Button>
           <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            Já tem uma conta?{" "}
             <Link href="/login" className="font-medium text-primary hover:underline">
-              Log in
+              Entrar
             </Link>
           </p>
         </CardFooter>

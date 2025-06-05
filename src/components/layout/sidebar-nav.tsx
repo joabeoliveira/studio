@@ -5,12 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   FileSearch,
-  Users,
-  FileText,
-  UserCog, // Corrected from UsersCog
-  Briefcase,
-  DollarSign,
-  ShoppingCart,
+  UserCog, 
   Building,
   ClipboardList,
 } from "lucide-react";
@@ -23,17 +18,18 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { UserRole } from "@/types";
+
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/research", label: "Price Research", icon: FileSearch },
-  { href: "/suppliers", label: "Suppliers", icon: Building },
-  { href: "/reports", label: "Reports", icon: ClipboardList },
-  { href: "/admin/users", label: "User Management", icon: UserCog, adminOnly: true }, // Corrected from UsersCog
+  { href: "/", label: "Painel Principal", icon: LayoutDashboard },
+  { href: "/research", label: "Pesquisa de Preços", icon: FileSearch },
+  { href: "/suppliers", label: "Fornecedores", icon: Building },
+  { href: "/reports", label: "Relatórios", icon: ClipboardList },
+  { href: "/admin/users", label: "Gerenciamento de Usuários", icon: UserCog, adminOnly: true },
 ];
 
-// Placeholder for user role, replace with actual auth context
-const currentUserRole = "Admin"; 
+const currentUserRole: UserRole = "Administrador"; 
 
 export function SidebarNav() {
   const pathname = usePathname();
@@ -44,7 +40,7 @@ export function SidebarNav() {
         <SidebarGroup>
           <SidebarGroupLabel className="font-headline">Menu</SidebarGroupLabel>
             {navItems.map((item) => {
-              if (item.adminOnly && currentUserRole !== "Admin") {
+              if (item.adminOnly && currentUserRole !== "Administrador") {
                 return null;
               }
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));

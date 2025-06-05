@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Filter, Search, PlusCircle, Activity, CheckCircle2, AlertTriangle, FileSearch } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import type { PriceResearchStatus } from "@/types";
 
 interface DashboardStat {
   title: string;
@@ -20,24 +21,25 @@ interface DashboardStat {
 }
 
 const stats: DashboardStat[] = [
-  { title: "Ongoing Research", value: "12", icon: Activity, bgColorClass: "bg-blue-100 dark:bg-blue-900", iconColorClass: "text-primary" },
-  { title: "Completed Research", value: "45", icon: CheckCircle2, bgColorClass: "bg-green-100 dark:bg-green-900", iconColorClass: "text-accent-foreground" },
-  { title: "Pending Actions", value: "3", icon: AlertTriangle, bgColorClass: "bg-yellow-100 dark:bg-yellow-900", iconColorClass: "text-yellow-600 dark:text-yellow-400" },
-  { title: "Total Items Priced", value: "287", icon: FileSearch, bgColorClass: "bg-indigo-100 dark:bg-indigo-900", iconColorClass: "text-indigo-600 dark:text-indigo-400" },
+  { title: "Pesquisas em Andamento", value: "12", icon: Activity, bgColorClass: "bg-blue-100 dark:bg-blue-900", iconColorClass: "text-primary" },
+  { title: "Pesquisas Concluídas", value: "45", icon: CheckCircle2, bgColorClass: "bg-green-100 dark:bg-green-900", iconColorClass: "text-accent-foreground" },
+  { title: "Ações Pendentes", value: "3", icon: AlertTriangle, bgColorClass: "bg-yellow-100 dark:bg-yellow-900", iconColorClass: "text-yellow-600 dark:text-yellow-400" },
+  { title: "Total de Itens Cotados", value: "287", icon: FileSearch, bgColorClass: "bg-indigo-100 dark:bg-indigo-900", iconColorClass: "text-indigo-600 dark:text-indigo-400" },
 ];
 
 const recentResearch = [
-  { id: "R001", description: "Acquisition of Office Laptops Model X", status: "Ongoing", date: "2024-07-20", agent: "John Doe" },
-  { id: "R002", description: "Hiring Cleaning Services for Building A", status: "Completed", date: "2024-07-15", agent: "Jane Smith" },
-  { id: "R003", description: "Purchase of A4 Paper Reams", status: "Pending Review", date: "2024-07-22", agent: "Peter Jones" },
-  { id: "R004", description: "Software License Renewal - CRM", status: "Ongoing", date: "2024-07-18", agent: "Alice Brown" },
+  { id: "R001", description: "Aquisição de Laptops de Escritório Modelo X", status: "Em Andamento" as PriceResearchStatus, date: "2024-07-20", agent: "João Ninguém" },
+  { id: "R002", description: "Contratação de Serviços de Limpeza para Prédio A", status: "Concluída" as PriceResearchStatus, date: "2024-07-15", agent: "Joana Silva" },
+  { id: "R003", description: "Compra de Resmas de Papel A4", status: "Pendente de Revisão" as PriceResearchStatus, date: "2024-07-22", agent: "Pedro Alves" },
+  { id: "R004", description: "Renovação de Licença de Software - CRM", status: "Em Andamento" as PriceResearchStatus, date: "2024-07-18", agent: "Alice Ferreira" },
 ];
 
-const statusBadgeVariant = (status: string) => {
+const statusBadgeVariant = (status: PriceResearchStatus) => {
   switch (status) {
-    case "Ongoing": return "secondary";
-    case "Completed": return "default"; // Will use primary color
-    case "Pending Review": return "outline"; // Will use accent or similar
+    case "Em Andamento": return "secondary";
+    case "Concluída": return "default"; 
+    case "Pendente de Revisão": return "outline"; 
+    case "Rascunho": return "destructive";
     default: return "secondary";
   }
 };
@@ -48,10 +50,10 @@ export default function DashboardPage() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-bold font-headline">Dashboard</h1>
+          <h1 className="text-3xl font-bold font-headline">Painel Principal</h1>
           <Link href="/research/new" passHref>
              <Button>
-              <PlusCircle className="mr-2 h-4 w-4" /> New Price Research
+              <PlusCircle className="mr-2 h-4 w-4" /> Nova Pesquisa de Preços
             </Button>
           </Link>
         </div>
@@ -72,26 +74,27 @@ export default function DashboardPage() {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Recent Price Research</CardTitle>
-            <CardDescription>Overview of the latest research activities.</CardDescription>
+            <CardTitle>Pesquisas de Preços Recentes</CardTitle>
+            <CardDescription>Visão geral das últimas atividades de pesquisa.</CardDescription>
             <div className="mt-4 flex flex-col sm:flex-row items-center gap-2">
               <div className="relative flex-grow w-full sm:w-auto">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input type="search" placeholder="Search research..." className="pl-8 w-full sm:w-[300px]" />
+                <Input type="search" placeholder="Buscar pesquisas..." className="pl-8 w-full sm:w-[300px]" />
               </div>
               <Select defaultValue="all">
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Filter by status" />
+                  <SelectValue placeholder="Filtrar por status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="ongoing">Ongoing</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="pending">Pending Review</SelectItem>
+                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <SelectItem value="Em Andamento">Em Andamento</SelectItem>
+                  <SelectItem value="Concluída">Concluída</SelectItem>
+                  <SelectItem value="Pendente de Revisão">Pendente de Revisão</SelectItem>
+                  <SelectItem value="Rascunho">Rascunho</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" /> Filter
+                <Filter className="mr-2 h-4 w-4" /> Filtrar
               </Button>
             </div>
           </CardHeader>
@@ -100,11 +103,11 @@ export default function DashboardPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>Description</TableHead>
+                  <TableHead>Descrição</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Agent</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Responsável</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -119,7 +122,7 @@ export default function DashboardPage() {
                     <TableCell>{item.agent}</TableCell>
                     <TableCell>
                       <Link href={`/research/${item.id}`} passHref>
-                        <Button variant="outline" size="sm">View</Button>
+                        <Button variant="outline" size="sm">Ver</Button>
                       </Link>
                     </TableCell>
                   </TableRow>
@@ -131,14 +134,14 @@ export default function DashboardPage() {
         
         <Card className="shadow-lg" data-ai-hint="government building">
           <CardHeader>
-            <CardTitle>Compliance Overview</CardTitle>
-            <CardDescription>Insights into IN 65/2021 compliance.</CardDescription>
+            <CardTitle>Visão Geral de Conformidade</CardTitle>
+            <CardDescription>Insights sobre a conformidade com a IN 65/2021.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col md:flex-row gap-4 items-center">
             <div className="w-full md:w-1/2">
               <Image 
                 src="https://placehold.co/600x400.png" 
-                alt="Compliance Chart Placeholder"
+                alt="Placeholder de Gráfico de Conformidade"
                 width={600}
                 height={400}
                 className="rounded-md object-cover"
@@ -146,8 +149,8 @@ export default function DashboardPage() {
               />
             </div>
             <div className="w-full md:w-1/2 space-y-2">
-              <p className="text-muted-foreground">This section will display charts and statistics related to compliance, such as adherence to price collection parameters, justification completeness, and report generation timelines.</p>
-              <Button variant="secondary">View Compliance Details</Button>
+              <p className="text-muted-foreground">Esta seção exibirá gráficos e estatísticas relacionadas à conformidade, como aderência aos parâmetros de coleta de preços, completude das justificativas e prazos de geração de relatórios.</p>
+              <Button variant="secondary">Ver Detalhes de Conformidade</Button>
             </div>
           </CardContent>
         </Card>
