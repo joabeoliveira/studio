@@ -2,7 +2,8 @@
 "use client";
 
 import { useState } from 'react';
-import type { PriceDataItem as PriceDataItemTypeForAI } from '@/ai/flows/validate-price-estimates'; // AI version without UI id
+// Atualiza a importação para usar AiPriceDataItem, que é o tipo correto exportado pelo fluxo.
+import type { AiPriceDataItem as PriceDataItemTypeForAI } from '@/ai/flows/validate-price-estimates';
 import { validatePriceEstimates, type ValidatePriceEstimatesInput, type ValidatePriceEstimatesOutput } from '@/ai/flows/validate-price-estimates';
 import type { PriceDataItem as PriceDataItemUIType } from '@/types'; // UI version with id
 import { Button } from '@/components/ui/button';

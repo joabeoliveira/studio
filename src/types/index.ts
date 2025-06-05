@@ -1,10 +1,13 @@
 
-import type { PriceDataItemSchema as AiPriceDataItemSchema } from '@/ai/flows/validate-price-estimates'; // Renamed to avoid conflict if re-exporting a modified version
 import { z } from 'zod';
 
-
-// Define Zod schemas for base types that might be used by AI flows AND UI
-// This helps keep AI-facing descriptions in one place.
+// Define PriceDataItemSchema aqui
+export const PriceDataItemSchema = z.object({
+  source: z.string().describe('A fonte do dado de preço (ex: Painel de Preços, cotação de fornecedor).'),
+  date: z.string().describe('A data em que o dado de preço foi coletado (AAAA-MM-DD).'),
+  price: z.number().describe('O preço do item.'),
+  notes: z.string().optional().describe('Quaisquer notas ou qualificações sobre o dado de preço.'),
+});
 
 export const UserRoleSchema = z.enum(["Administrador", "Pesquisador", "Revisor"]);
 export type UserRole = z.infer<typeof UserRoleSchema>;
@@ -22,8 +25,8 @@ export type PriceResearchStatus = z.infer<typeof PriceResearchStatusSchema>;
 export const ContractTypeSchema = z.enum(["Bens", "Serviços"]);
 export type ContractType = z.infer<typeof ContractTypeSchema>;
 
-// For UI, we add an 'id'. For AI, it's usually not needed in the input list.
-export const PriceDataItemUISchema = AiPriceDataItemSchema.extend({
+// Para UI, nós adicionamos um 'id'.
+export const PriceDataItemUISchema = PriceDataItemSchema.extend({
   id: z.string().describe("Identificador único do item de dado de preço (uso interno da UI).")
 });
 export type PriceDataItem = z.infer<typeof PriceDataItemUISchema>;
@@ -40,7 +43,7 @@ export interface PriceResearch {
   attachments?: File[]; 
   priceDataItems: PriceDataItem[];
   estimatedPrice?: number;
-  calculationMethod?: "average" | "median" | "lowest"; // These could be translated for display if needed
+  calculationMethod?: "average" | "median" | "lowest"; // Estes podem ser traduzidos para exibição se necessário
 }
 
 export interface Supplier {
@@ -59,7 +62,7 @@ export interface QuoteRequest {
   researchId: string;
   requestDate: string;
   responseDeadline: string;
-  status: "Enviada" | "Respondida" | "Sem Resposta" | "Recusada"; // Translated status
+  status: "Enviada" | "Respondida" | "Sem Resposta" | "Recusada"; // Status traduzido
   proposalFile?: File; 
   proposalDetails?: string; 
 }

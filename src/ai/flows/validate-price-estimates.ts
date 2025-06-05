@@ -1,29 +1,25 @@
+
 'use server';
 
 /**
  * @fileOverview This file defines a Genkit flow for validating price estimates against IN65/2021 compliance standards.
  *
  * - validatePriceEstimates - A function that validates price estimates and suggests an estimated cost using average/median calculation.
+ * - AiPriceDataItem - The type for individual price data items used by the AI flow.
  * - ValidatePriceEstimatesInput - The input type for the validatePriceEstimates function.
  * - ValidatePriceEstimatesOutput - The return type for the validatePriceEstimates function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { PriceDataItemSchema } from '@/types'; // Importa o schema Zod de src/types
 
-// This schema is used by the AI flow. Do not add UI-specific 'id' here.
-export const PriceDataItemSchema = z.object({
-  source: z.string().describe('A fonte do dado de preço (ex: Painel de Preços, cotação de fornecedor).'),
-  date: z.string().describe('A data em que o dado de preço foi coletado (AAAA-MM-DD).'),
-  price: z.number().describe('O preço do item.'),
-  notes: z.string().optional().describe('Quaisquer notas ou qualificações sobre o dado de preço.'),
-});
-export type PriceDataItem = z.infer<typeof PriceDataItemSchema>;
-
+// Define e exporta o tipo para itens de dados de preço específicos da IA (sem id da UI)
+export type AiPriceDataItem = z.infer<typeof PriceDataItemSchema>;
 
 const ValidatePriceEstimatesInputSchema = z.object({
   description: z.string().describe('Uma descrição detalhada do item ou serviço sendo cotado.'),
-  priceData: z.array(PriceDataItemSchema).describe('Um array de dados de preços coletados de várias fontes.'),
+  priceData: z.array(PriceDataItemSchema).describe('Um array de dados de preços coletados de várias fontes.'), // Usa PriceDataItemSchema importado
 });
 
 export type ValidatePriceEstimatesInput = z.infer<typeof ValidatePriceEstimatesInputSchema>;
