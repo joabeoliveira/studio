@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResearchTable } from "@/components/research/research-table";
 import type { PriceResearch, PriceResearchStatus, ContractType } from "@/types";
-import { PlusCircle, Search, Filter } from "lucide-react";
-import Link from "next/link";
+import { PlusCircle, Search, Filter, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,24 +19,42 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-const initialResearchItems: PriceResearch[] = [
-  { id: "PR001", description: "Aquisição de 100 Cadeiras de Escritório", responsibleAgent: "Ana Silva", status: "Em Andamento", creationDate: "2024-07-01", lastModifiedDate: "2024-07-15", contractType: "Bens", priceDataItems: [] },
-  { id: "PR002", description: "Desenvolvimento do Novo Portal de RH", responsibleAgent: "Carlos Souza", status: "Concluída", creationDate: "2024-05-10", lastModifiedDate: "2024-06-20", contractType: "Serviços", priceDataItems: [] },
-  { id: "PR003", description: "Fornecimento de Materiais de Impressão", responsibleAgent: "Beatriz Lima", status: "Rascunho", creationDate: "2024-07-20", lastModifiedDate: "2024-07-20", contractType: "Bens", priceDataItems: [] },
-  { id: "PR004", description: "Serviços de Segurança para Edifício Principal", responsibleAgent: "David Costa", status: "Pendente de Revisão", creationDate: "2024-06-01", lastModifiedDate: "2024-07-10", contractType: "Serviços", priceDataItems: [] },
-];
+import { useToast } from "@/hooks/use-toast";
+import { getResearchItems, addResearch, updateResearchDetails, deleteResearch } from "@/services/researchService";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function ResearchPage() {
-  const [researchItems, setResearchItems] = useState<PriceResearch[]>(initialResearchItems);
+  const [researchItems, setResearchItems] = useState<PriceResearch[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<PriceResearchStatus | "all">("all");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PriceResearch | null>(null);
 
+  const { toast } = useToast();
+  const { userProfile } = useAuth();
+  const router = useRouter();
+
   const [newResearchData, setNewResearchData] = useState<{description: string, responsibleAgent: string, contractType: ContractType}>({
     description: "", responsibleAgent: "", contractType: "Bens"
   });
+
+  const fetchResearch = async () => {
+    setIsLoading(true);
+    try {
+      const items = await getResearchItems();
+      setResearchItems(items);
+    } catch (error) {
+      toast({ title: "Erro", description: "Falha ao carregar pesquisas.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchResearch();
+  }, []);
 
   const handleEdit = (item: PriceResearch) => {
     setEditingItem(item);
@@ -45,38 +62,56 @@ export default function ResearchPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setResearchItems(researchItems.filter(item => item.id !== id));
-  };
-  
-  const handleViewReport = (id: string) => {
-    alert(`Visualizando relatório para ${id}`);
+  const handleDelete = async (id: string) => {
+    if (confirm("Tem certeza que deseja excluir este item? Esta ação é irreversível.")) {
+      try {
+        await deleteResearch(id);
+        toast({ title: "Sucesso!", description: "Pesquisa excluída." });
+        await fetchResearch();
+      } catch (error) {
+        toast({ title: "Erro", description: "Não foi possível excluir a pesquisa.", variant: "destructive" });
+      }
+    }
   };
 
-  const handleFormSubmit = () => {
-    if (editingItem) {
-      setResearchItems(researchItems.map(item => item.id === editingItem.id ? { ...item, ...newResearchData, lastModifiedDate: new Date().toISOString() } : item));
-    } else {
-      const newItem: PriceResearch = {
-        id: `PR${String(researchItems.length + 1).padStart(3, '0')}`,
-        ...newResearchData,
-        status: "Rascunho",
-        creationDate: new Date().toISOString(),
-        lastModifiedDate: new Date().toISOString(),
-        priceDataItems: [],
-      };
-      setResearchItems([...researchItems, newItem]);
+  const handleFormSubmit = async () => {
+    if (!userProfile) {
+        toast({ title: "Erro de Autenticação", description: "Usuário não encontrado.", variant: "destructive" });
+        return;
     }
-    setIsFormOpen(false);
-    setEditingItem(null);
-    setNewResearchData({ description: "", responsibleAgent: "", contractType: "Bens" });
+
+    try {
+      if (editingItem) {
+        // Lógica de Edição
+        await updateResearchDetails(editingItem.id, {
+            description: newResearchData.description,
+            responsibleAgent: newResearchData.responsibleAgent,
+            contractType: newResearchData.contractType,
+        });
+        toast({ title: "Sucesso!", description: "Pesquisa atualizada." });
+      } else {
+        // Lógica de Criação
+        const newId = await addResearch({
+          ...newResearchData,
+          status: "Rascunho", // Status inicial padrão
+        });
+        toast({ title: "Sucesso!", description: "Nova pesquisa criada." });
+        router.push(`/research/${newId}`); // Redireciona para a página da nova pesquisa
+      }
+      
+      setIsFormOpen(false);
+      setEditingItem(null);
+      await fetchResearch(); // Recarrega a lista
+    } catch (error) {
+        toast({ title: "Erro ao Salvar", description: "Não foi possível salvar a pesquisa.", variant: "destructive" });
+    }
   };
   
   const openNewResearchForm = () => {
     setEditingItem(null);
-    setNewResearchData({ description: "", responsibleAgent: "", contractType: "Bens" });
+    setNewResearchData({ description: "", responsibleAgent: userProfile?.name || "", contractType: "Bens" });
     setIsFormOpen(true);
-  }
+  };
 
   const filteredItems = researchItems.filter(item =>
     item.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -121,16 +156,20 @@ export default function ResearchPage() {
                   <SelectItem value="Arquivada">Arquivada</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" /> Mais Filtros
-              </Button>
             </div>
           </CardHeader>
           <CardContent>
-            {filteredItems.length > 0 ? (
-                <ResearchTable researchItems={filteredItems} onEdit={handleEdit} onDelete={handleDelete} onViewReport={handleViewReport} />
+            {isLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="ml-2">Carregando pesquisas...</p>
+              </div>
+            ) : filteredItems.length > 0 ? (
+                <ResearchTable researchItems={filteredItems} onEdit={handleEdit} onDelete={handleDelete} onViewReport={function (id: string): void {
+                  throw new Error("Function not implemented.");
+                } } />
             ) : (
-                <p className="text-center text-muted-foreground py-8">Nenhum item de pesquisa encontrado.</p>
+                <p className="text-center text-muted-foreground py-8">Nenhuma pesquisa encontrada. Clique em "Nova Pesquisa" para começar.</p>
             )}
           </CardContent>
         </Card>

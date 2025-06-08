@@ -19,27 +19,33 @@ export async function getResearchItems(): Promise<PriceResearch[]> {
     return [];
   }
   
-  return data.map((item: ResearchFromDB) => ({
-    ...item,
-    id: String(item.id), // Converte id para string
-    priceDataItems: [],
+  // Mapeia os campos do banco (snake_case) para o frontend (camelCase)
+  return data.map((item: any) => ({
+    id: String(item.id),
+    description: item.description,
+    responsibleAgent: item.responsible_agent,
+    status: item.status,
+    creationDate: item.created_at,
+    lastModifiedDate: item.last_modified_date,
+    contractType: item.contract_type,
+    priceDataItems: [], // Itens de preço são carregados separadamente
+    estimatedPrice: item.estimated_price,
+    calculationMethod: item.calculation_method,
+    justifications: item.justifications,
   }));
 }
 
 export async function addResearch(researchData: Partial<Omit<PriceResearch, 'id' | 'priceDataItems'>>): Promise<string> {
-  // Mapeia os campos de camelCase (do formulário) para snake_case (do banco de dados)
   const dataForDB = {
     description: researchData.description,
-    responsible_agent: researchData.responsibleAgent, // Traduzido
-    contract_type: researchData.contractType,       // Traduzido
-    status: researchData.status || 'Rascunho'        // Garante um status padrão
+    responsible_agent: researchData.responsibleAgent,
+    contract_type: researchData.contractType,
+    status: researchData.status || 'Rascunho'
   };
-
-  console.log('Enviando para o Supabase:', dataForDB);
   
   const { data, error } = await supabase
     .from('researches')
-    .insert([dataForDB]) // Usa o objeto traduzido para o banco de dados
+    .insert([dataForDB])
     .select('id')
     .single();
 
@@ -66,7 +72,6 @@ export async function deleteResearch(id: string): Promise<void> {
 // --- NOVAS FUNÇÕES ---
 
 export async function getResearchItemById(id: string): Promise<PriceResearch | null> {
-  // 1. Busca os detalhes da pesquisa principal
   const { data: researchData, error: researchError } = await supabase
     .from('researches')
     .select('*')
@@ -78,7 +83,6 @@ export async function getResearchItemById(id: string): Promise<PriceResearch | n
     return null;
   }
 
-  // 2. Busca os itens de preço associados
   const { data: priceItemsData, error: priceItemsError } = await supabase
     .from('price_data_items')
     .select('*')
@@ -86,16 +90,43 @@ export async function getResearchItemById(id: string): Promise<PriceResearch | n
 
   if (priceItemsError) {
     console.error('Erro ao buscar itens de preço:', priceItemsError);
-    // Retorna a pesquisa mesmo que os itens de preço falhem
-    return { ...researchData, id: String(researchData.id), priceDataItems: [] };
+    return { 
+        id: String(researchData.id),
+        description: researchData.description,
+        responsibleAgent: researchData.responsible_agent,
+        status: researchData.status,
+        creationDate: researchData.created_at,
+        lastModifiedDate: researchData.last_modified_date,
+        contractType: researchData.contract_type,
+        priceDataItems: [],
+        estimatedPrice: researchData.estimated_price,
+        calculationMethod: researchData.calculation_method,
+        justifications: researchData.justifications,
+    };
   }
   
-  const priceDataItems = priceItemsData.map((item: PriceDataItemFromDB) => ({
-    ...item,
+  const priceDataItems = priceItemsData.map((item: any) => ({
     id: String(item.id),
+    source: item.source,
+    source_type: item.source_type,
+    date: item.date,
+    price: item.price,
+    notes: item.notes
   }));
 
-  return { ...researchData, id: String(researchData.id), priceDataItems };
+  return { 
+    id: String(researchData.id),
+    description: researchData.description,
+    responsibleAgent: researchData.responsible_agent,
+    status: researchData.status,
+    creationDate: researchData.created_at,
+    lastModifiedDate: researchData.last_modified_date,
+    contractType: researchData.contract_type,
+    priceDataItems,
+    estimatedPrice: researchData.estimated_price,
+    calculationMethod: researchData.calculation_method,
+    justifications: researchData.justifications,
+  };
 }
 
 export async function updateResearchDetails(id: string, updates: Partial<Omit<PriceResearch, 'id' | 'priceDataItems'>>): Promise<void> {
@@ -104,10 +135,8 @@ export async function updateResearchDetails(id: string, updates: Partial<Omit<Pr
     };
 
     if (updates.description !== undefined) updatesForDB.description = updates.description;
-    // CORREÇÃO: Mapeando responsibleAgent para responsible_agent
     if (updates.responsibleAgent !== undefined) updatesForDB.responsible_agent = updates.responsibleAgent;
     if (updates.status !== undefined) updatesForDB.status = updates.status;
-    // CORREÇÃO: Mapeando contractType para contract_type
     if (updates.contractType !== undefined) updatesForDB.contract_type = updates.contractType;
     if (updates.estimatedPrice !== undefined) updatesForDB.estimated_price = updates.estimatedPrice;
     if (updates.calculationMethod !== undefined) updatesForDB.calculation_method = updates.calculationMethod;
@@ -128,7 +157,6 @@ export async function updateResearchDetails(id: string, updates: Partial<Omit<Pr
 export async function addPriceDataItem(researchId: string, itemData: Omit<PriceDataItem, 'id'>): Promise<string> {
   const { data, error } = await supabase
     .from('price_data_items')
-    // A query já usa '...itemData', então ela incluirá o novo campo automaticamente.
     .insert([{ ...itemData, research_id: Number(researchId) }])
     .select('id')
     .single();
@@ -140,7 +168,6 @@ export async function addPriceDataItem(researchId: string, itemData: Omit<PriceD
 export async function updatePriceDataItem(id: string, itemData: Partial<Omit<PriceDataItem, 'id'>>): Promise<void> {
   const { error } = await supabase
     .from('price_data_items')
-    // A query já usa '...itemData', então ela incluirá o novo campo automaticamente.
     .update(itemData)
     .eq('id', Number(id));
   
