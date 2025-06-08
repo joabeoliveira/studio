@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { AiValidationSection } from "@/components/research/ai-validation-section";
-import type { PriceResearch, PriceDataItem as PriceDataItemType } from "@/types";
+import type { PriceResearch } from "@/types";
 import { ArrowLeft, Edit, Save, PlusCircle, CheckSquare, Sigma, FileText, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -22,8 +22,12 @@ import { useAuth } from "@/context/AuthContext";
 import { addReport } from "@/services/reportService";
 import { 
     getResearchItemById,
-    updateResearchDetails, 
+    updateResearchDetails,
+    addPriceDataItem,
+    updatePriceDataItem,
+    deletePriceDataItem,
 } from "@/services/researchService";
+import { type PriceDataItemFormData } from "@/lib/validators";
 
 const sourceTypes = [
     "I - Painel de Preços ou sistemas similares",
@@ -56,7 +60,6 @@ export default function IndividualResearchPage() {
     const item = await getResearchItemById(researchId);
     setResearchItem(item);
     if (item) {
-      // Pré-popula os estados da análise com os dados salvos no banco
       setSelectedPricesForCalc(item.priceDataItems.map(pdi => pdi.id));
       setCalculationMethod(item.calculationMethod || 'median');
       setJustifications(item.justifications || { method: '', desconsideration: '', adjustment: '', lessThanThree: '' });
@@ -68,7 +71,6 @@ export default function IndividualResearchPage() {
     fetchResearchItem();
   }, [fetchResearchItem]);
   
-  // Efeito para recalcular o preço estimado sempre que os inputs mudarem
   useEffect(() => {
     if (!researchItem) return;
     const pricesToConsider = researchItem.priceDataItems
@@ -124,9 +126,39 @@ export default function IndividualResearchPage() {
     toast({ title: "Detalhes Salvos!" });
   };
   
-  const handlePriceDataUpdate = async (updatedData: PriceDataItemType[]) => {
-      await fetchResearchItem();
+  const handleAddPriceDataItem = async (item: Omit<PriceDataItemFormData, 'id'>) => {
+    try {
+      await addPriceDataItem(researchId, item);
+      toast({ title: 'Item Adicionado!', description: 'O novo item de preço foi salvo.' });
+      await fetchResearchItem(); // Recarrega os dados
+    } catch (error) {
+      toast({ title: 'Erro', description: 'Não foi possível adicionar o item.', variant: 'destructive' });
+    }
   };
+
+  const handleUpdatePriceDataItem = async (item: PriceDataItemFormData) => {
+    try {
+      if (!item.id) throw new Error("ID do item não encontrado.");
+      await updatePriceDataItem(item.id, item);
+      toast({ title: 'Item Atualizado!', description: 'O item de preço foi atualizado.' });
+      await fetchResearchItem();
+    } catch (error) {
+      toast({ title: 'Erro', description: 'Não foi possível atualizar o item.', variant: 'destructive' });
+    }
+  };
+
+  const handleDeletePriceDataItem = async (id: string) => {
+    if(confirm('Tem certeza que deseja excluir este item de preço?')) {
+        try {
+            await deletePriceDataItem(id);
+            toast({ title: 'Item Excluído!', description: 'O item de preço foi removido.' });
+            await fetchResearchItem();
+        } catch (error) {
+            toast({ title: 'Erro', description: 'Não foi possível excluir o item.', variant: 'destructive' });
+        }
+    }
+  };
+
 
   const handleGenerateReport = async () => {
     if (!researchItem || !userProfile) return;
@@ -195,7 +227,14 @@ export default function IndividualResearchPage() {
           </TabsList>
 
           <TabsContent value="aiValidation" className="mt-4">
-             <AiValidationSection researchDescription={researchItem.description} initialPriceData={researchItem.priceDataItems} onPriceDataUpdate={handlePriceDataUpdate} />
+             <AiValidationSection 
+                researchId={researchId}
+                researchDescription={researchItem.description} 
+                priceData={researchItem.priceDataItems} 
+                onAddItem={handleAddPriceDataItem}
+                onUpdateItem={handleUpdatePriceDataItem}
+                onDeleteItem={handleDeletePriceDataItem}
+              />
           </TabsContent>
 
           <TabsContent value="analysis" className="mt-4">

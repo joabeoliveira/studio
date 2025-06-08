@@ -7,7 +7,7 @@ import type { PriceDataItem as PriceDataItemUIType } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, CheckCircle, AlertCircle, Sigma, FileDigit } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Sigma, FileDigit, PlusCircle } from 'lucide-react';
 import { PriceDataItemForm } from './price-data-item-form';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '../ui/textarea';
@@ -15,53 +15,31 @@ import { Label } from '../ui/label';
 import { type PriceDataItemFormData } from '@/lib/validators';
 
 interface AiValidationSectionProps {
+  researchId: string;
   researchDescription: string;
-  initialPriceData: PriceDataItemUIType[];
-  onPriceDataUpdate: (updatedData: PriceDataItemUIType[]) => void;
+  priceData: PriceDataItemUIType[];
+  onAddItem: (item: Omit<PriceDataItemFormData, 'id'>) => Promise<void>;
+  onUpdateItem: (item: PriceDataItemFormData) => Promise<void>;
+  onDeleteItem: (id: string) => Promise<void>;
 }
 
-export function AiValidationSection({ researchDescription, initialPriceData, onPriceDataUpdate }: AiValidationSectionProps) {
-  const [priceData, setPriceData] = useState<PriceDataItemUIType[]>(initialPriceData);
+export function AiValidationSection({ researchId, researchDescription, priceData, onAddItem, onUpdateItem, onDeleteItem }: AiValidationSectionProps) {
   const [currentDescription, setCurrentDescription] = useState(researchDescription);
   const [validationResult, setValidationResult] = useState<ValidatePriceEstimatesOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
 
-  const handleAddPriceDataItem = (item: PriceDataItemFormData) => {
-    const newItem: PriceDataItemUIType = {
-      ...item,
-      id: `temp-${Date.now()}`,
-      price: Number(item.price),
-      source_type: item.source_type ?? "", // valor padrão vazio ou outro valor padrão
-    };
-    const updatedData = [...priceData, newItem];
-    setPriceData(updatedData);
-    onPriceDataUpdate(updatedData); 
+  const handleSave = async (data: PriceDataItemFormData) => {
+    if (!data.id) {
+      const { id, ...itemToAdd } = data;
+      await onAddItem(itemToAdd);
+    } else {
+      await onUpdateItem(data);
+    }
     setShowAddItemForm(false);
-  };
-
-  const handleUpdatePriceDataItem = (updatedItem: PriceDataItemFormData) => {
-    const updatedData = priceData.map(item =>
-      item.id === updatedItem.id
-        ? {
-            ...item,
-            ...updatedItem,
-            price: Number(updatedItem.price),
-            source_type: updatedItem.source_type ?? item.source_type ?? "", // garante que nunca será undefined
-          }
-        : item
-    );
-    setPriceData(updatedData);
-    onPriceDataUpdate(updatedData); 
-  };
-
-  const handleDeletePriceDataItem = (id: string) => {
-    const updatedData = priceData.filter(item => item.id !== id);
-    setPriceData(updatedData);
-    onPriceDataUpdate(updatedData); 
-  };
-
+  }
+  
   const handleValidate = async () => {
     if (priceData.length === 0) {
       setError("Adicione pelo menos um item de dado de preço antes da validação.");
@@ -119,11 +97,11 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
                 key={item.id}
                 initialData={{
                   ...item,
-                  price: Number(item.price),
-                  source_type: item.source_type ?? "", // valor padrão para garantir que nunca será undefined
+                  price: Number(item.price), // Garante que o preço é um número
+                  source_type: item.source_type ?? "", // <-- CORREÇÃO APLICADA
                 }}
-                onSave={handleUpdatePriceDataItem}
-                onDelete={handleDeletePriceDataItem}
+                onSave={handleSave}
+                onDelete={onDeleteItem}
                 isExisting={true}
               />
             ))}
@@ -131,14 +109,14 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
 
           {showAddItemForm && (
             <PriceDataItemForm
-              onSave={handleAddPriceDataItem}
+              onSave={handleSave}
               onCancel={() => setShowAddItemForm(false)}
               isExisting={false}
             />
           )}
           {!showAddItemForm && (
             <Button variant="outline" onClick={() => setShowAddItemForm(true)} className="mt-2">
-              Adicionar Item de Dado de Preço
+              <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Item
             </Button>
           )}
         </div>
