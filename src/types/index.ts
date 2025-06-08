@@ -4,10 +4,12 @@ import { z } from 'zod';
 // Define PriceDataItemSchema aqui
 export const PriceDataItemSchema = z.object({
   source: z.string().describe('A fonte do dado de preço (ex: Painel de Preços, cotação de fornecedor).'),
+  source_type: z.string().optional().describe('O parâmetro do Art. 5º da IN 65/2021.'), // <-- LINHA ADICIONADA
   date: z.string().describe('A data em que o dado de preço foi coletado (AAAA-MM-DD).'),
   price: z.number().describe('O preço do item.'),
   notes: z.string().optional().describe('Quaisquer notas ou qualificações sobre o dado de preço.'),
 });
+
 
 export const UserRoleSchema = z.enum(["Administrador", "Pesquisador", "Revisor"]);
 export type UserRole = z.infer<typeof UserRoleSchema>;
@@ -44,6 +46,7 @@ export interface PriceResearch {
   priceDataItems: PriceDataItem[];
   estimatedPrice?: number;
   calculationMethod?: "average" | "median" | "lowest"; // Estes podem ser traduzidos para exibição se necessário
+  justifications?: any;
 }
 
 export interface Supplier {

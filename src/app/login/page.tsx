@@ -1,14 +1,47 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import Image from "next/image";
-import { KeyRound, Mail } from "lucide-react";
+import { KeyRound, Mail, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: "Erro no Login",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Login realizado com sucesso!",
+      });
+      router.push('/'); // Redireciona para o dashboard
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-2xl">
@@ -29,7 +62,15 @@ export default function LoginPage() {
             <Label htmlFor="email">E-mail</Label>
             <div className="relative">
               <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input id="email" type="email" placeholder="usuario@example.gov.br" required className="pl-8"/>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="usuario@example.gov.br" 
+                required 
+                className="pl-8"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
           </div>
           <div className="space-y-2">
@@ -41,12 +82,22 @@ export default function LoginPage() {
             </div>
             <div className="relative">
               <KeyRound className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input id="password" type="password" required  className="pl-8"/>
+              <Input 
+                id="password" 
+                type="password" 
+                required  
+                className="pl-8"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">Entrar</Button>
+          <Button onClick={handleLogin} disabled={isLoading} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Entrar
+          </Button>
           <p className="text-center text-sm text-muted-foreground">
             Não tem uma conta?{" "}
             <Link href="/signup" className="font-medium text-primary hover:underline">

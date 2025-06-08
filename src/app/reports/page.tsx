@@ -1,43 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ReportTable } from "@/components/reports/report-table";
 import type { Report } from "@/types";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const initialReports: Report[] = [
-  { id: "REP001", researchId: "PR001", researchDescription: "Aquisição de 100 Laptops de Escritório Modelo X2024", generationDate: "2024-07-18", generatedBy: "Ana Silva" },
-  { id: "REP002", researchId: "PR002", researchDescription: "Desenvolvimento do Novo Portal de RH", generationDate: "2024-06-25", generatedBy: "Carlos Souza" },
-];
+import { getReports } from "@/services/reportService";
 
 export default function ReportsPage() {
-  const [reports, setReports] = useState<Report[]>(initialReports);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleDownload = (report: Report) => {
-    // Simula o download de um arquivo de texto com os detalhes do relatório
-    const reportContent = `
-Relatório de Pesquisa de Preços (Simulado)
-ID do Relatório: ${report.id}
-ID da Pesquisa: ${report.researchId}
-Descrição da Pesquisa: ${report.researchDescription}
-Gerado em: ${new Date(report.generationDate).toLocaleDateString()}
-Gerado por: ${report.generatedBy}
+  useEffect(() => {
+    async function fetchReports() {
+      setIsLoading(true);
+      const data = await getReports();
+      setReports(data);
+      setIsLoading(false);
+    }
+    fetchReports();
+  }, []);
 
-Este é um download simulado. O conteúdo detalhado do relatório estaria aqui.
-    `;
-    const blob = new Blob([reportContent.trim()], { type: 'text/plain;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Relatorio_${report.id}_${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
+  const handleDownload = (report: Report) => {
+    // Simula o download de um arquivo de texto
+    alert(`Simulando download do relatório ${report.id}`);
   };
 
   const filteredReports = reports.filter(report =>
@@ -48,9 +38,7 @@ Este é um download simulado. O conteúdo detalhado do relatório estaria aqui.
   return (
     <AppLayout>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-bold font-headline">Relatórios Gerados</h1>
-        </div>
+        <h1 className="text-3xl font-bold font-headline">Relatórios Gerados</h1>
 
         <Card className="shadow-lg">
           <CardHeader>
@@ -67,13 +55,15 @@ Este é um download simulado. O conteúdo detalhado do relatório estaria aqui.
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" /> Filtrar
-              </Button>
             </div>
           </CardHeader>
           <CardContent>
-             {filteredReports.length > 0 ? (
+            {isLoading ? (
+               <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="ml-2">Carregando relatórios...</p>
+              </div>
+            ) : filteredReports.length > 0 ? (
                 <ReportTable reports={filteredReports} onDownload={handleDownload} />
             ) : (
                 <p className="text-center text-muted-foreground py-8">Nenhum relatório encontrado.</p>

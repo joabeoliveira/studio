@@ -1,39 +1,31 @@
-
 "use client";
 
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Filter, Search, PlusCircle, Activity, CheckCircle2, AlertTriangle, FileSearch } from "lucide-react";
+import { PlusCircle, Activity, CheckCircle2, AlertTriangle, FileSearch, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
-import type { PriceResearchStatus } from "@/types";
+import type { PriceResearch, PriceResearchStatus } from "@/types";
+import { getDashboardStats, getRecentResearch } from "@/services/dashboardService";
 
-interface DashboardStat {
-  title: string;
-  value: string;
-  icon: React.ElementType;
-  bgColorClass: string;
-  iconColorClass: string;
-}
+const chartConfig = {
+  percentual: { label: "Percentual (%)" },
+  prazos: { label: "Aderência a Prazos", color: "hsl(var(--chart-1))" },
+  coletas: { label: "Coletas Válidas", color: "hsl(var(--chart-2))" },
+  justificativas: { label: "Justificativas", color: "hsl(var(--chart-3))" },
+  documental: { label: "Documentação", color: "hsl(var(--chart-4))" },
+} satisfies ChartConfig;
 
-const stats: DashboardStat[] = [
-  { title: "Pesquisas em Andamento", value: "12", icon: Activity, bgColorClass: "bg-blue-100 dark:bg-blue-900", iconColorClass: "text-primary" },
-  { title: "Pesquisas Concluídas", value: "45", icon: CheckCircle2, bgColorClass: "bg-green-100 dark:bg-green-900", iconColorClass: "text-accent-foreground" },
-  { title: "Ações Pendentes", value: "3", icon: AlertTriangle, bgColorClass: "bg-yellow-100 dark:bg-yellow-900", iconColorClass: "text-yellow-600 dark:text-yellow-400" },
-  { title: "Total de Itens Cotados", value: "287", icon: FileSearch, bgColorClass: "bg-indigo-100 dark:bg-indigo-900", iconColorClass: "text-indigo-600 dark:text-indigo-400" },
-];
-
-const recentResearch = [
-  { id: "R001", description: "Aquisição de Laptops de Escritório Modelo X", status: "Em Andamento" as PriceResearchStatus, date: "2024-07-20", agent: "João Ninguém" },
-  { id: "R002", description: "Contratação de Serviços de Limpeza para Prédio A", status: "Concluída" as PriceResearchStatus, date: "2024-07-15", agent: "Joana Silva" },
-  { id: "R003", description: "Compra de Resmas de Papel A4", status: "Pendente de Revisão" as PriceResearchStatus, date: "2024-07-22", agent: "Pedro Alves" },
-  { id: "R004", description: "Renovação de Licença de Software - CRM", status: "Em Andamento" as PriceResearchStatus, date: "2024-07-18", agent: "Alice Ferreira" },
+const complianceChartData = [
+  { category: 'Aderência a Prazos', percentual: 85, fill: "var(--color-prazos)" },
+  { category: 'Coletas Válidas', percentual: 92, fill: "var(--color-coletas)" },
+  { category: 'Justificativas Completas', percentual: 78, fill: "var(--color-justificativas)" },
+  { category: 'Conformidade Documental', percentual: 88, fill: "var(--color-documental)" },
 ];
 
 const statusBadgeVariant = (status: PriceResearchStatus) => {
@@ -46,43 +38,48 @@ const statusBadgeVariant = (status: PriceResearchStatus) => {
   }
 };
 
-const complianceChartData = [
-  { category: 'Aderência a Prazos', percentual: 85, fill: "var(--color-prazos)" },
-  { category: 'Coletas Válidas', percentual: 92, fill: "var(--color-coletas)" },
-  { category: 'Justificativas Completas', percentual: 78, fill: "var(--color-justificativas)" },
-  { category: 'Conformidade Documental', percentual: 88, fill: "var(--color-documental)" },
-];
-
-const chartConfig = {
-  percentual: {
-    label: "Percentual (%)",
-  },
-  prazos: {
-    label: "Aderência a Prazos",
-    color: "hsl(var(--chart-1))",
-  },
-  coletas: {
-    label: "Coletas Válidas",
-    color: "hsl(var(--chart-2))",
-  },
-  justificativas: {
-    label: "Justificativas",
-    color: "hsl(var(--chart-3))",
-  },
-  documental: {
-    label: "Documentação",
-    color: "hsl(var(--chart-4))",
-  }
-} satisfies ChartConfig;
-
-
 export default function DashboardPage() {
+  const [stats, setStats] = useState({ inProgress: 0, completed: 0, pendingReview: 0, totalResearches: 0 });
+  const [recentResearch, setRecentResearch] = useState<PriceResearch[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      setIsLoading(true);
+      const [statsData, recentData] = await Promise.all([
+        getDashboardStats(),
+        getRecentResearch()
+      ]);
+      setStats(statsData);
+      setRecentResearch(recentData);
+      setIsLoading(false);
+    }
+    loadDashboardData();
+  }, []);
+
+  const statsCards = [
+    { title: "Pesquisas em Andamento", value: stats.inProgress, icon: Activity },
+    { title: "Pesquisas Concluídas", value: stats.completed, icon: CheckCircle2 },
+    { title: "Ações Pendentes", value: stats.pendingReview, icon: AlertTriangle },
+    { title: "Total de Pesquisas", value: stats.totalResearches, icon: FileSearch },
+  ];
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="flex h-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
+    )
+  }
+
   return (
     <AppLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <h1 className="text-3xl font-bold font-headline">Painel Principal</h1>
-          <Link href="/research/new" passHref>
+          <Link href="/research" passHref>
              <Button>
               <PlusCircle className="mr-2 h-4 w-4" /> Nova Pesquisa de Preços
             </Button>
@@ -90,11 +87,11 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
+          {statsCards.map((stat) => (
             <Card key={stat.title} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <stat.icon className={`h-6 w-6 ${stat.iconColorClass}`} />
+                <stat.icon className="h-6 w-6 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">{stat.value}</div>
@@ -107,27 +104,6 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle>Pesquisas de Preços Recentes</CardTitle>
             <CardDescription>Visão geral das últimas atividades de pesquisa.</CardDescription>
-            <div className="mt-4 flex flex-col sm:flex-row items-center gap-2">
-              <div className="relative flex-grow w-full sm:w-auto">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input type="search" placeholder="Buscar pesquisas..." className="pl-8 w-full sm:w-[300px]" />
-              </div>
-              <Select defaultValue="all">
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Filtrar por status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Status</SelectItem>
-                  <SelectItem value="Em Andamento">Em Andamento</SelectItem>
-                  <SelectItem value="Concluída">Concluída</SelectItem>
-                  <SelectItem value="Pendente de Revisão">Pendente de Revisão</SelectItem>
-                  <SelectItem value="Rascunho">Rascunho</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline">
-                <Filter className="mr-2 h-4 w-4" /> Filtrar
-              </Button>
-            </div>
           </CardHeader>
           <CardContent>
             <Table>
@@ -136,7 +112,6 @@ export default function DashboardPage() {
                   <TableHead>ID</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Data</TableHead>
                   <TableHead>Responsável</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
@@ -149,8 +124,7 @@ export default function DashboardPage() {
                     <TableCell>
                       <Badge variant={statusBadgeVariant(item.status)}>{item.status}</Badge>
                     </TableCell>
-                    <TableCell>{item.date}</TableCell>
-                    <TableCell>{item.agent}</TableCell>
+                    <TableCell>{item.responsibleAgent}</TableCell>
                     <TableCell>
                       <Link href={`/research/${item.id}`} passHref>
                         <Button variant="outline" size="sm">Ver</Button>
@@ -168,36 +142,20 @@ export default function DashboardPage() {
             <CardTitle>Visão Geral de Conformidade</CardTitle>
             <CardDescription>Insights sobre a conformidade com a IN 65/2021.</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="w-full h-[300px] md:h-[400px]">
+          <CardContent>
+            <div className="h-[300px]">
               <ChartContainer config={chartConfig} className="w-full h-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={complianceChartData} accessibilityLayer>
                     <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="category"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                      // tickFormatter={(value) => value.slice(0, 3)} // Uncomment for shorter labels if needed
-                    />
-                    <YAxis 
-                        label={{ value: 'Percentual (%)', angle: -90, position: 'insideLeft', offset: -5 }}
-                        tickFormatter={(value) => `${value}%`}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent indicator="dashed" />}
-                    />
+                    <XAxis dataKey="category" tickLine={false} tickMargin={10} axisLine={false} />
+                    <YAxis label={{ value: 'Percentual (%)', angle: -90, position: 'insideLeft', offset: -5 }} tickFormatter={(value) => `${value}%`} />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed" />} />
                     <ChartLegend content={<ChartLegendContent />} />
                     <Bar dataKey="percentual" radius={8} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
-            </div>
-            <div className="w-full space-y-2 text-center md:text-left">
-              <p className="text-muted-foreground">O gráfico acima demonstra os principais indicadores de conformidade das pesquisas de preços. Acompanhe a aderência aos prazos, a validade das coletas, a completude das justificativas e a conformidade documental.</p>
-              <Button variant="secondary">Ver Detalhes de Conformidade</Button>
             </div>
           </CardContent>
         </Card>

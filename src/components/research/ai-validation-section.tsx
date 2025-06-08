@@ -1,11 +1,9 @@
-
 "use client";
 
 import { useState } from 'react';
-// Atualiza a importação para usar AiPriceDataItem, que é o tipo correto exportado pelo fluxo.
 import type { AiPriceDataItem as PriceDataItemTypeForAI } from '@/ai/flows/validate-price-estimates';
 import { validatePriceEstimates, type ValidatePriceEstimatesInput, type ValidatePriceEstimatesOutput } from '@/ai/flows/validate-price-estimates';
-import type { PriceDataItem as PriceDataItemUIType } from '@/types'; // UI version with id
+import type { PriceDataItem as PriceDataItemUIType } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -14,6 +12,7 @@ import { PriceDataItemForm } from './price-data-item-form';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
+import { type PriceDataItemFormData } from '@/lib/validators';
 
 interface AiValidationSectionProps {
   researchDescription: string;
@@ -29,15 +28,30 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
   const [error, setError] = useState<string | null>(null);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
 
-  const handleAddPriceDataItem = (item: PriceDataItemUIType) => {
-    const updatedData = [...priceData, item];
+  const handleAddPriceDataItem = (item: PriceDataItemFormData) => {
+    const newItem: PriceDataItemUIType = {
+      ...item,
+      id: `temp-${Date.now()}`,
+      price: Number(item.price),
+      source_type: item.source_type ?? "", // valor padrão vazio ou outro valor padrão
+    };
+    const updatedData = [...priceData, newItem];
     setPriceData(updatedData);
     onPriceDataUpdate(updatedData); 
     setShowAddItemForm(false);
   };
 
-  const handleUpdatePriceDataItem = (updatedItem: PriceDataItemUIType) => {
-    const updatedData = priceData.map(item => item.id === updatedItem.id ? updatedItem : item);
+  const handleUpdatePriceDataItem = (updatedItem: PriceDataItemFormData) => {
+    const updatedData = priceData.map(item =>
+      item.id === updatedItem.id
+        ? {
+            ...item,
+            ...updatedItem,
+            price: Number(updatedItem.price),
+            source_type: updatedItem.source_type ?? item.source_type ?? "", // garante que nunca será undefined
+          }
+        : item
+    );
     setPriceData(updatedData);
     onPriceDataUpdate(updatedData); 
   };
@@ -47,7 +61,6 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
     setPriceData(updatedData);
     onPriceDataUpdate(updatedData); 
   };
-
 
   const handleValidate = async () => {
     if (priceData.length === 0) {
@@ -101,15 +114,19 @@ export function AiValidationSection({ researchDescription, initialPriceData, onP
             <p className="text-sm text-muted-foreground">Nenhum item de dado de preço adicionado ainda.</p>
           )}
           <ScrollArea className="max-h-[300px] pr-3">
-          {priceData.map((item) => (
-            <PriceDataItemForm
-              key={item.id}
-              item={item}
-              onSave={handleUpdatePriceDataItem}
-              onDelete={handleDeletePriceDataItem}
-              isExisting={true}
-            />
-          ))}
+            {priceData.map((item) => (
+              <PriceDataItemForm
+                key={item.id}
+                initialData={{
+                  ...item,
+                  price: Number(item.price),
+                  source_type: item.source_type ?? "", // valor padrão para garantir que nunca será undefined
+                }}
+                onSave={handleUpdatePriceDataItem}
+                onDelete={handleDeletePriceDataItem}
+                isExisting={true}
+              />
+            ))}
           </ScrollArea>
 
           {showAddItemForm && (

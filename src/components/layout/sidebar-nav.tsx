@@ -18,8 +18,7 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { UserRole } from "@/types";
-
+import { useAuth } from "@/context/AuthContext"; // <-- Importe o hook
 
 const navItems = [
   { href: "/", label: "Painel Principal", icon: LayoutDashboard },
@@ -29,10 +28,9 @@ const navItems = [
   { href: "/admin/users", label: "Gerenciamento de Usuários", icon: UserCog, adminOnly: true },
 ];
 
-const currentUserRole: UserRole = "Administrador"; 
-
 export function SidebarNav() {
   const pathname = usePathname();
+  const { userProfile } = useAuth(); // <-- Use o hook para pegar o perfil
 
   return (
     <ScrollArea className="flex-1">
@@ -40,9 +38,11 @@ export function SidebarNav() {
         <SidebarGroup>
           <SidebarGroupLabel className="font-headline">Menu</SidebarGroupLabel>
             {navItems.map((item) => {
-              if (item.adminOnly && currentUserRole !== "Administrador") {
+              // Condição para renderizar o item de menu
+              if (item.adminOnly && userProfile?.role !== "Administrador") {
                 return null;
               }
+              
               const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
               return (
                 <SidebarMenuItem key={item.href}>
