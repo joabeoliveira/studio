@@ -9,6 +9,16 @@ type ReportForDB = {
   generated_by_id: string;
 }
 
+// Mapeia as colunas do banco (snake_case) para o frontend (camelCase)
+const mapReportFromDB = (item: any): Report => ({
+  id: String(item.id),
+  researchId: String(item.research_id),
+  researchDescription: item.research_description,
+  generationDate: item.generation_date,
+  generatedBy: item.generated_by_name,
+});
+
+
 export async function getReports(): Promise<Report[]> {
   const { data, error } = await supabase
     .from('reports')
@@ -20,14 +30,7 @@ export async function getReports(): Promise<Report[]> {
     return [];
   }
 
-  // Renomeia as colunas de snake_case para camelCase para corresponder ao tipo Report
-  return data.map(item => ({
-    id: String(item.id),
-    researchId: String(item.research_id),
-    researchDescription: item.research_description,
-    generationDate: item.generation_date,
-    generatedBy: item.generated_by_name
-  }));
+  return data.map(mapReportFromDB);
 }
 
 export async function addReport(reportData: ReportForDB): Promise<string> {
@@ -42,4 +45,20 @@ export async function addReport(reportData: ReportForDB): Promise<string> {
     throw error;
   }
   return String(data.id);
+}
+
+// NOVA FUNÇÃO ADICIONADA AQUI
+export async function getReportById(id: string): Promise<Report | null> {
+  const { data, error } = await supabase
+    .from('reports')
+    .select('*')
+    .eq('id', Number(id))
+    .single();
+  
+  if (error) {
+    console.error(`Erro ao buscar relatório ${id}:`, error);
+    return null;
+  }
+
+  return mapReportFromDB(data);
 }

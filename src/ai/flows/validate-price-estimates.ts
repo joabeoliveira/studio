@@ -1,25 +1,18 @@
 
 'use server';
 
-/**
- * @fileOverview This file defines a Genkit flow for validating price estimates against IN65/2021 compliance standards.
- *
- * - validatePriceEstimates - A function that validates price estimates and suggests an estimated cost using average/median calculation.
- * - AiPriceDataItem - The type for individual price data items used by the AI flow.
- * - ValidatePriceEstimatesInput - The input type for the validatePriceEstimates function.
- * - ValidatePriceEstimatesOutput - The return type for the validatePriceEstimates function.
- */
+// src/ai/flows/validate-price-estimates.ts
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { PriceDataItemSchema } from '@/types'; // Importa o schema Zod de src/types
+import { PriceDataItemSchema } from '@/types';
 
 // Define e exporta o tipo para itens de dados de preço específicos da IA (sem id da UI)
 export type AiPriceDataItem = z.infer<typeof PriceDataItemSchema>;
 
 const ValidatePriceEstimatesInputSchema = z.object({
   description: z.string().describe('Uma descrição detalhada do item ou serviço sendo cotado.'),
-  priceData: z.array(PriceDataItemSchema).describe('Um array de dados de preços coletados de várias fontes.'), // Usa PriceDataItemSchema importado
+  priceData: z.array(PriceDataItemSchema).describe('Um array de dados de preços coletados de várias fontes.'),
 });
 
 export type ValidatePriceEstimatesInput = z.infer<typeof ValidatePriceEstimatesInputSchema>;
@@ -36,30 +29,51 @@ export async function validatePriceEstimates(input: ValidatePriceEstimatesInput)
   return validatePriceEstimatesFlow(input);
 }
 
+// PROMPT CORRIGIDO
 const validatePriceEstimatesPrompt = ai.definePrompt({
   name: 'validatePriceEstimatesPrompt',
   input: {schema: ValidatePriceEstimatesInputSchema},
   output: {schema: ValidatePriceEstimatesOutputSchema},
-  prompt: `Você é um especialista em compras públicas brasileiras, especializado em conformidade com a Instrução Normativa SEGES/ME Nº 65/2021.
+  prompt: `
+  Você é um especialista em compras públicas no Brasil, com foco total na conformidade com a Instrução Normativa SEGES/ME Nº 65, de 07 de julho de 2021. Sua tarefa é analisar os dados de uma pesquisa de preços e fornecer uma avaliação técnica e precisa.
 
-  Revise os dados de preços fornecidos para o seguinte item/serviço:
-  Descrição: {{{description}}}
+  Item sendo cotado:
+  - Descrição: {{{description}}}
 
-  Dados de Preços:
+  Dados de Preços Coletados:
   {{#each priceData}}
-  - Fonte: {{{source}}}, Data: {{{date}}}, Preço: {{{price}}}, Notas: {{{notes}}}
+  - Fonte: "{{source}}", Tipo: "{{source_type}}", Data: {{date}}, Preço: R$ {{price}}{{#if notes}}, Notas: "{{notes}}"{{/if}}
   {{/each}}
 
-  Identifique quaisquer problemas de conformidade com base na IN65/2021. Calcule um custo estimado usando a média e a mediana dos preços fornecidos. Documente a metodologia utilizada. Retorne os resultados no seguinte formato JSON.
-  Output format: \`\`\`
+  Por favor, siga estes passos rigorosamente:
+
+  1.  **Análise de Conformidade (IN 65/2021)**:
+      * **Suficiência de Fontes (Art. 5º)**: Verifique se há pelo menos três preços coletados. Se houver menos de três, mencione que é necessária uma justificativa formal do gestor.
+      * **Diversidade de Fontes**: Avalie se os preços vêm de fontes diversas (ex: diferentes empresas, e não apenas cotações da mesma empresa ou de um único painel).
+      * **Validade dos Preços**: Identifique preços que pareçam muito antigos, inexequíveis (excessivamente baixos) ou sobrepreço (excessivamente altos) em comparação com a média/mediana dos demais. Marque-os como "descartados" para o cálculo.
+      * Liste todos os problemas de conformidade encontrados em uma lista clara e objetiva. Se nenhum problema for encontrado, afirme isso explicitamente.
+
+  2.  **Cálculo do Preço Estimado (Art. 6º)**:
+      * Utilize **apenas os preços que você considerou válidos** na etapa anterior.
+      * Calcule a **Média Aritmética** e a **Mediana** desses preços.
+      * Adote a **Mediana** como o "Custo Estimado" final, pois é menos sensível a valores extremos. Se houver apenas dois preços, utilize a média. Se houver apenas um, este será o valor.
+
+  3.  **Detalhamento do Cálculo**:
+      * Na sua explicação, liste quais preços foram usados para o cálculo e quais foram descartados, explicando brevemente o porquê (ex: "Preço de R$ 10,00 da Fonte Y foi descartado por ser inexequível").
+      * Apresente o valor da média e da mediana calculados.
+      * Conclua afirmando que o custo estimado é o valor da mediana.
+
+  Retorne sua análise final estritamente no seguinte formato JSON. Não inclua comentários ou explicações fora do JSON. A estrutura deve ser:
+  \`\`\`json
   {
-    "complianceIssues": ["List any compliance issues here"],
-    "estimatedCost": "The estimated cost",
-    "calculationDetails": "Details on average/median calculation"
+    "complianceIssues": ["Lista de problemas de conformidade aqui"],
+    "estimatedCost": 123.45,
+    "calculationDetails": "Detalhes sobre o cálculo da média/mediana aqui"
   }
   \`\`\`
   `,
 });
+
 
 const validatePriceEstimatesFlow = ai.defineFlow(
   {

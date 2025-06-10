@@ -182,3 +182,29 @@ export async function deletePriceDataItem(id: string): Promise<void> {
     
     if (error) throw error;
 }
+
+// Função para buscar no catálogo usando Full-Text Search
+export async function searchCatmatByText(query: string) {
+  if (!query || query.trim().length < 3) {
+      return []; // Não busca se a query for muito curta
+  }
+
+  // Transforma a busca do usuário em um formato que o PostgreSQL entende
+  // Ex: "parafuso aço" se torna "parafuso & aço" (busca por E)
+  const formattedQuery = query.trim().split(/\s+/).join(' & ');
+
+  const { data, error } = await supabase
+    .from('catalogo_materiais')
+    .select('codigo_catmat, descricao')
+    .textSearch('descricao', formattedQuery, { // Usando o método textSearch do Supabase
+      type: 'websearch', // Um tipo de busca flexível
+      config: 'portuguese'
+    })
+    .limit(10); // Limita aos 10 resultados mais relevantes
+
+  if (error) {
+    console.error('Erro na busca por texto:', error);
+    return [];
+  }
+  return data;
+}
